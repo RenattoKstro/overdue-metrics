@@ -6,7 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 
 const MetaDesafio = () => {
-  const { data, formatCurrency, progressoDesafio } = useDashboard();
+  const { data, formatCurrency } = useDashboard();
+
+  // Verificação de dados para evitar erros
+  const progressoDesafio = data?.progressoDesafio || 0; // Valor padrão se indefinido
+  const recebidoDesafioMes = data?.recebidoDesafioMes || 0;
 
   return (
     <div className="animate-slide-up">
@@ -32,7 +36,7 @@ const MetaDesafio = () => {
                   <div className="flex items-center">
                     <DollarSign className="h-4 w-4 text-blue-500 mr-2" />
                     <Badge variant="outline" className="font-semibold text-lg">
-                      {formatCurrency(data.recebidoDesafioMes)}
+                      {formatCurrency(recebidoDesafioMes)}
                     </Badge>
                   </div>
                 </div>
@@ -47,7 +51,7 @@ const MetaDesafio = () => {
                     <span className="text-sm font-medium text-slate-700">A Receber</span>
                   </div>
                   <Badge variant="outline" className="font-semibold">
-                    {formatCurrency(data.aReceberDesafio)}
+                    {formatCurrency(data.aReceberDesafio || 0)}
                   </Badge>
                 </div>
                 
@@ -57,7 +61,7 @@ const MetaDesafio = () => {
                     <span className="text-sm font-medium text-slate-700">Falta Receber</span>
                   </div>
                   <Badge variant="outline" className="font-semibold">
-                    {formatCurrency(data.faltaReceberDesafioMes)}
+                    {formatCurrency(data.faltaReceberDesafioMes || 0)}
                   </Badge>
                 </div>
               </div>
