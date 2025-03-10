@@ -4,10 +4,10 @@ import MetaFiado from '@/components/MetaFiado';
 import MetaDesafio from '@/components/MetaDesafio';
 import MetaValeAlimentacao from '@/components/MetaValeAlimentacao';
 import AjustesDeMetas from '@/components/AjustesDeMetas';
-import MeuPremios from '@/components/MeuPremios';
+import MeusPremios from '@/components/MeusPremios'; // Corrigido para MeusPremios
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('ajustes-de-metas'); // Definindo a guia inicial como "Ajustes de Metas"
+  const [activeTab, setActiveTab] = useState('ajustes-de-metas');
 
   return (
     <div className="container mx-auto p-4">
@@ -38,7 +38,7 @@ const Dashboard = () => {
         </TabsContent>
 
         <TabsContent value="meu-premios">
-          <MeuPremios />
+          <MeusPremios />
         </TabsContent>
       </Tabs>
     </div>
