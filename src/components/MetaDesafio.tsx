@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Trophy, Target } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,33 +7,33 @@ import { useDashboard } from '@/context/DashboardContext';
 
 const MetaDesafio = () => {
   const { data, updateData, calculateProgress, formatCurrency } = useDashboard();
+  const [inputValue, setInputValue] = useState(formatCurrency(data.metaDesafio));
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get raw input value
-    const rawValue = e.target.value;
-    
-    // Remove currency symbols and formatting
-    const numericValue = rawValue.replace(/[^0-9,.]/g, '')
-                              .replace(',', '.'); // Replace comma with dot
-    
-    // Convert to number if valid
-    const floatValue = parseFloat(numericValue);
-    
-    if (!isNaN(floatValue)) {
-      updateData('metaDesafio', floatValue);
-    }
+    const rawValue = e.target.value.replace(/[^0-9,.]/g, '').replace(',', '.');
+    setInputValue(rawValue);
   };
 
-  // Cálculos para as barras de progresso
+  const handleBlur = () => {
+    const numericValue = parseFloat(inputValue.replace(',', '.')) || 0;
+    updateData('metaDesafio', numericValue);
+    setInputValue(formatCurrency(numericValue));
+    setIsEditing(false);
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsEditing(true);
+    const rawValue = data.metaDesafio.toString().replace('.', ',');
+    setInputValue(rawValue);
+    e.target.select();
+  };
+
   const progressValue = data.progressoDesafio;
   const recebidoDesafio = data.aberturaVencidoMes - data.vencidoAtual;
-  
-  // Calcular valores restantes para atingir as metas
   const valorFaltante96 = Math.max(data.vencidoAtual - (data.metaDesafio * 0.96), 0);
   const valorFaltante98 = Math.max(data.vencidoAtual - (data.metaDesafio * 0.98), 0);
   const valorFaltante100 = Math.max(data.vencidoAtual - data.metaDesafio, 0);
-  
-  // Calcular progresso para cada meta
   const progress96 = calculateProgress(data.vencidoAtual > 0 ? (data.metaDesafio * 0.96 / data.vencidoAtual) * 100 : 0);
   const progress98 = calculateProgress(data.vencidoAtual > 0 ? (data.metaDesafio * 0.98 / data.vencidoAtual) * 100 : 0);
   const progress100 = calculateProgress(data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0);
@@ -56,10 +55,11 @@ const MetaDesafio = () => {
                 <Target className="h-5 w-5 text-yellow-500" />
                 <Input
                   id="metaDesafio"
-                  value={formatCurrency(data.metaDesafio)}
+                  value={isEditing ? inputValue : formatCurrency(data.metaDesafio)}
                   onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  onFocus={handleFocus}
                   className="font-semibold text-xl"
-                  onFocus={(e) => e.target.select()}
                 />
               </div>
               
