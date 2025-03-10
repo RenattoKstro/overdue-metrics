@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Wallet, Calendar, Sunrise, Target, AlertTriangle, ArrowDown, CheckCircle, Building, BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,38 +8,44 @@ import { Badge } from '@/components/ui/badge';
 
 const MetaFiado = () => {
   const { data, updateData, formatCurrency } = useDashboard();
-  
-  // Percentual correto: Meta do Mês ÷ Vencido Atual
-  const percentageReached = data.vencidoAtual !== 0 
-    ? (data.metaMes / data.vencidoAtual) * 100
-    : 0;
-    
-  const progressValue = Math.min(Math.max(percentageReached, 0), 100);
-  
-  let progressColor = "bg-red-500";
-  if (progressValue >= 90) {
-    progressColor = "bg-green-500";
-  } else if (progressValue >= 70) {
-    progressColor = "bg-yellow-500";
-  } else if (progressValue >= 50) {
-    progressColor = "bg-orange-500";
-  }
+  const [inputs, setInputs] = useState({
+    aberturaVencidoMes: formatCurrency(data.aberturaVencidoMes),
+    aberturaVencidoDia: formatCurrency(data.aberturaVencidoDia),
+    metaMes: formatCurrency(data.metaMes),
+    vencidoAtual: formatCurrency(data.vencidoAtual),
+  });
+  const [isEditing, setIsEditing] = useState({
+    aberturaVencidoMes: false,
+    aberturaVencidoDia: false,
+    metaMes: false,
+    vencidoAtual: false,
+  });
 
   const handleInputChange = (field: keyof typeof data, e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get raw input value
-    const rawValue = e.target.value;
-    
-    // Remove currency symbols and formatting
-    const numericValue = rawValue.replace(/[^0-9,.]/g, '')
-                              .replace(',', '.'); // Replace comma with dot
-    
-    // Convert to number if valid
-    const floatValue = parseFloat(numericValue);
-    
-    if (!isNaN(floatValue)) {
-      updateData(field, floatValue);
-    }
+    const rawValue = e.target.value.replace(/[^0-9,.]/g, '').replace(',', '.');
+    setInputs((prev) => ({ ...prev, [field]: rawValue }));
   };
+
+  const handleBlur = (field: keyof typeof data) => {
+    const numericValue = parseFloat(inputs[field].replace(',', '.')) || 0;
+    updateData(field, numericValue);
+    setInputs((prev) => ({ ...prev, [field]: formatCurrency(numericValue) }));
+    setIsEditing((prev) => ({ ...prev, [field]: false }));
+  };
+
+  const handleFocus = (field: keyof typeof data, e: React.FocusEvent<HTMLInputElement>) => {
+    setIsEditing((prev) => ({ ...prev, [field]: true }));
+    const rawValue = data[field].toString().replace('.', ',');
+    setInputs((prev) => ({ ...prev, [field]: rawValue }));
+    e.target.select();
+  };
+
+  const percentageReached = data.vencidoAtual !== 0 ? (data.metaMes / data.vencidoAtual) * 100 : 0;
+  const progressValue = Math.min(Math.max(percentageReached, 0), 100);
+  let progressColor = "bg-red-500";
+  if (progressValue >= 90) progressColor = "bg-green-500";
+  else if (progressValue >= 70) progressColor = "bg-yellow-500";
+  else if (progressValue >= 50) progressColor = "bg-orange-500";
 
   return (
     <div className="animate-slide-up">
@@ -85,10 +91,11 @@ const MetaFiado = () => {
             <Label htmlFor="aberturaVencidoMes">Valor</Label>
             <Input
               id="aberturaVencidoMes"
-              value={formatCurrency(data.aberturaVencidoMes)}
+              value={isEditing.aberturaVencidoMes ? inputs.aberturaVencidoMes : formatCurrency(data.aberturaVencidoMes)}
               onChange={(e) => handleInputChange('aberturaVencidoMes', e)}
+              onBlur={() => handleBlur('aberturaVencidoMes')}
+              onFocus={(e) => handleFocus('aberturaVencidoMes', e)}
               className="font-semibold text-xl mt-1"
-              onFocus={(e) => e.target.select()}
             />
           </CardContent>
         </Card>
@@ -104,10 +111,11 @@ const MetaFiado = () => {
             <Label htmlFor="aberturaVencidoDia">Valor</Label>
             <Input
               id="aberturaVencidoDia"
-              value={formatCurrency(data.aberturaVencidoDia)}
+              value={isEditing.aberturaVencidoDia ? inputs.aberturaVencidoDia : formatCurrency(data.aberturaVencidoDia)}
               onChange={(e) => handleInputChange('aberturaVencidoDia', e)}
+              onBlur={() => handleBlur('aberturaVencidoDia')}
+              onFocus={(e) => handleFocus('aberturaVencidoDia', e)}
               className="font-semibold text-xl mt-1"
-              onFocus={(e) => e.target.select()}
             />
           </CardContent>
         </Card>
@@ -123,10 +131,11 @@ const MetaFiado = () => {
             <Label htmlFor="metaMes">Valor</Label>
             <Input
               id="metaMes"
-              value={formatCurrency(data.metaMes)}
+              value={isEditing.metaMes ? inputs.metaMes : formatCurrency(data.metaMes)}
               onChange={(e) => handleInputChange('metaMes', e)}
+              onBlur={() => handleBlur('metaMes')}
+              onFocus={(e) => handleFocus('metaMes', e)}
               className="font-semibold text-xl mt-1"
-              onFocus={(e) => e.target.select()}
             />
           </CardContent>
         </Card>
@@ -142,10 +151,11 @@ const MetaFiado = () => {
             <Label htmlFor="vencidoAtual">Valor</Label>
             <Input
               id="vencidoAtual"
-              value={formatCurrency(data.vencidoAtual)}
+              value={isEditing.vencidoAtual ? inputs.vencidoAtual : formatCurrency(data.vencidoAtual)}
               onChange={(e) => handleInputChange('vencidoAtual', e)}
+              onBlur={() => handleBlur('vencidoAtual')}
+              onFocus={(e) => handleFocus('vencidoAtual', e)}
               className="font-semibold text-xl mt-1"
-              onFocus={(e) => e.target.select()}
             />
           </CardContent>
         </Card>
