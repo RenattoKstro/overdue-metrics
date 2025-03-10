@@ -17,7 +17,7 @@ interface DashboardData {
   recebidoDesafioMes: number;
   faltaReceberDesafioMes: number;
   progressoDesafio: number;
-  metaDesafio: number; // Adicionado
+  metaDesafio: number;
 }
 
 interface DashboardContextType {
@@ -47,19 +47,23 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     recebidoDesafioMes: 3000,
     faltaReceberDesafioMes: 2000,
     progressoDesafio: 60,
-    metaDesafio: 5000, // Valor inicial para meta do desafio
+    metaDesafio: 5000,
   });
 
   const updateData = (key: keyof DashboardData, value: number | Date | boolean) => {
     setData(prev => {
       const newData = { ...prev, [key]: value };
-      // Recalcular faltaReceberDesafioMes com base em aReceberDesafio e recebidoDesafioMes
-      if (key === 'aReceberDesafio' || key === 'recebidoDesafioMes' || key === 'metaDesafio') {
-        newData.faltaReceberDesafioMes = (newData.aReceberDesafio || 0) - (newData.recebidoDesafioMes || 0);
-        newData.progressoDesafio = newData.metaDesafio
-          ? ((newData.recebidoDesafioMes || 0) / newData.metaDesafio) * 100
-          : 0;
-      }
+      // Recalcular valores derivados
+      newData.faltaReceberMes = newData.aReceber - newData.recebidoMes;
+      newData.diasRestantes = newData.diaCorte; // Sincronizar diasRestantes com diaCorte
+      newData.recebimentoPorDia = newData.diasRestantes > 0 ? newData.faltaReceberMes / newData.diasRestantes : 0;
+
+      // Recalcular valores de Meta Desafio
+      newData.faltaReceberDesafioMes = (newData.aReceberDesafio || 0) - (newData.recebidoDesafioMes || 0);
+      newData.progressoDesafio = newData.metaDesafio && newData.metaDesafio > 0
+        ? ((newData.recebidoDesafioMes || 0) / newData.metaDesafio) * 100
+        : 0;
+
       return newData;
     });
   };
