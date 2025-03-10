@@ -1,0 +1,83 @@
+
+import React from 'react';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { useDashboard } from '@/context/DashboardContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+const Calendar = () => {
+  const { data, toggleWorkDay } = useDashboard();
+  const currentMonth = data.currentDate.toLocaleString('pt-BR', { month: 'long' });
+  const currentYear = data.currentDate.getFullYear();
+
+  // Get all days in the current month
+  const daysInMonth = new Date(data.currentDate.getFullYear(), data.currentDate.getMonth() + 1, 0).getDate();
+  const firstDayOfMonth = new Date(data.currentDate.getFullYear(), data.currentDate.getMonth(), 1).getDay();
+
+  // Create calendar grid
+  const calendarDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const paddingDays = Array.from({ length: firstDayOfMonth }, (_, i) => null);
+  const calendarGrid = [...paddingDays, ...calendarDays];
+
+  // Function to check if a day is a work day
+  const isWorkDay = (day: number) => {
+    const date = new Date(data.currentDate.getFullYear(), data.currentDate.getMonth(), day);
+    const workDay = data.workDays.find(wd => 
+      wd.date.getDate() === date.getDate() && 
+      wd.date.getMonth() === date.getMonth()
+    );
+    return workDay?.isWorkDay ?? false;
+  };
+
+  // Function to toggle work day
+  const handleToggleWorkDay = (day: number) => {
+    const date = new Date(data.currentDate.getFullYear(), data.currentDate.getMonth(), day);
+    toggleWorkDay(date);
+  };
+
+  // Days of the week (starting with Sunday)
+  const daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+
+  return (
+    <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+        <div className="flex items-center space-x-2">
+          <CalendarIcon className="h-6 w-6" />
+          <CardTitle>Calendário - {currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)} {currentYear}</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="p-6">
+        <p className="text-sm text-slate-600 mb-4">
+          Selecione os dias sem expediente. Os dias restantes serão considerados dias úteis para cálculos.
+        </p>
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {daysOfWeek.map((day, index) => (
+            <div key={index} className="text-center font-semibold text-sm py-2">
+              {day}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-1">
+          {calendarGrid.map((day, index) => (
+            <div key={index} className="aspect-square">
+              {day !== null ? (
+                <button
+                  className={`w-full h-full flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-200 
+                    ${isWorkDay(day) 
+                      ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' 
+                      : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
+                  onClick={() => handleToggleWorkDay(day)}
+                >
+                  {day}
+                </button>
+              ) : (
+                <div className="w-full h-full"></div>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default Calendar;
