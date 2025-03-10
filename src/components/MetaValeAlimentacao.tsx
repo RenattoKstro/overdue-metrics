@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Utensils, AlertTriangle, Calendar, BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 const MetaValeAlimentacao = () => {
   const { data, updateData, formatCurrency } = useDashboard();
   
-  // Valores para a barra de progresso - recebe atualizações do Meta Fiado
   const valorJaRecebido = data.aberturaVencidoMes - data.vencidoAtual;
   const percentageReached = data.metaValeAlimentacao !== 0 
     ? (valorJaRecebido / data.metaValeAlimentacao) * 100
@@ -16,14 +14,12 @@ const MetaValeAlimentacao = () => {
     
   const progressValue = Math.min(Math.max(percentageReached, 0), 100);
   
-  // Calcular quanto precisa receber por dia para atingir 80%
   const valorNecessario = data.metaValeAlimentacao;
   const valorFaltante = Math.max(valorNecessario - valorJaRecebido, 0);
   const recebimentoDiarioNecessario = data.diasUteisRestantesAteCorte > 0 
     ? valorFaltante / data.diasUteisRestantesAteCorte 
     : 0;
   
-  // Verificar se a meta foi batida (80% até o dia 15)
   useEffect(() => {
     const today = new Date();
     const currentDay = today.getDate();
@@ -31,33 +27,25 @@ const MetaValeAlimentacao = () => {
     const currentYear = today.getFullYear();
     const cutoffDate = new Date(currentYear, currentMonth, data.diaCorte);
     
-    // Se já passou do dia 15 e a meta ainda não foi avaliada
     if (today > cutoffDate && data.metaBatida === null) {
-      // Verificar se atingiu 80% da meta
-      const percentageAchieved = valorJaRecebido / data.metaValeAlimentacao;
-      updateData('metaBatida', percentageAchieved >= 0.8);
+      const percentageAchieved = valorJaRecebido / data.metaValeAlimentacao * 100;
+      updateData('metaBatida', percentageAchieved >= 80);
     }
     
-    // Se ainda não passou do dia 15, verificar em tempo real
     if (today <= cutoffDate) {
-      const percentageAchieved = valorJaRecebido / data.metaValeAlimentacao;
-      if (percentageAchieved >= 0.8) {
+      const percentageAchieved = valorJaRecebido / data.metaValeAlimentacao * 100;
+      if (percentageAchieved >= 80) {
         updateData('metaBatida', true);
       } else {
-        updateData('metaBatida', null); // Ainda pode bater a meta
+        updateData('metaBatida', null);
       }
     }
   }, [data.vencidoAtual, data.aberturaVencidoMes, data.metaValeAlimentacao]);
 
-  // Determinar a cor da barra de progresso
   let progressColor = "bg-red-500";
-  if (progressValue >= 80) {
-    progressColor = "bg-green-500";
-  } else if (progressValue >= 50) {
-    progressColor = "bg-yellow-500";
-  } else if (progressValue >= 30) {
-    progressColor = "bg-orange-500";
-  }
+  if (progressValue >= 80) progressColor = "bg-green-500";
+  else if (progressValue >= 50) progressColor = "bg-yellow-500";
+  else if (progressValue >= 30) progressColor = "bg-orange-500";
   
   return (
     <div className="animate-slide-up">
@@ -75,6 +63,7 @@ const MetaValeAlimentacao = () => {
                 <h3 className="text-lg font-semibold mb-2 text-slate-700">Regras da Meta</h3>
                 <p className="text-sm text-slate-600">
                   O objetivo é atingir 80% da meta até o dia 15 do mês.
+                  A meta corresponde a 80% do "A Receber" da Meta Fiado, que é recalculada dinamicamente.
                   Se atingir 80% ({formatCurrency(data.metaValeAlimentacao)}) até o dia 15, a meta é batida.
                 </p>
               </div>
