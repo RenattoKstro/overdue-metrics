@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Utensils, AlertTriangle, Calendar, BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,15 +8,15 @@ const MetaValeAlimentacao = () => {
   const { data, updateData, formatCurrency } = useDashboard();
   
   // Valores para a barra de progresso
-  const percentageReached = data.vencidoAtual !== 0 
-    ? ((data.aberturaVencidoMes - data.vencidoAtual) / data.metaValeAlimentacao) * 100
+  const valorJaRecebido = data.aberturaVencidoMes - data.vencidoAtual;
+  const percentageReached = data.metaValeAlimentacao !== 0 
+    ? (valorJaRecebido / data.metaValeAlimentacao) * 100
     : 0;
     
   const progressValue = Math.min(Math.max(percentageReached, 0), 100);
   
   // Calcular quanto precisa receber por dia para atingir 80%
   const valorNecessario = data.metaValeAlimentacao;
-  const valorJaRecebido = data.aberturaVencidoMes - data.vencidoAtual;
   const valorFaltante = Math.max(valorNecessario - valorJaRecebido, 0);
   const recebimentoDiarioNecessario = data.diasUteisRestantesAteCorte > 0 
     ? valorFaltante / data.diasUteisRestantesAteCorte 

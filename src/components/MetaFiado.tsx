@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Wallet, Calendar, Sunrise, Target, AlertTriangle, ArrowDown, CheckCircle, Building, BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,14 +9,12 @@ import { Badge } from '@/components/ui/badge';
 const MetaFiado = () => {
   const { data, updateData, formatCurrency } = useDashboard();
   
-  // Calcula percentual atingido
   const percentageReached = data.metaMes !== 0 
     ? (data.recebidoMes / data.metaMes) * 100
     : 0;
     
   const progressValue = Math.min(Math.max(percentageReached, 0), 100);
   
-  // Determina cor da barra de progresso
   let progressColor = "bg-red-500";
   if (progressValue >= 90) {
     progressColor = "bg-green-500";
@@ -28,17 +25,16 @@ const MetaFiado = () => {
   }
 
   const handleInputChange = (field: keyof typeof data, value: string) => {
-    const cleanValue = value.replace(/[^\d,-]/g, '').replace(',', '.');
-    const numValue = parseFloat(cleanValue);
+    const numericValue = value.replace(/[^0-9]/g, '');
+    const floatValue = parseFloat(numericValue) / 100;
     
-    if (!isNaN(numValue)) {
-      updateData(field, numValue);
+    if (!isNaN(floatValue)) {
+      updateData(field, floatValue);
     }
   };
 
   return (
     <div className="animate-slide-up">
-      {/* Barra de Progresso no Topo */}
       <Card className="mb-6 shadow-card hover:shadow-card-hover transition-all duration-300">
         <CardHeader className="bg-gradient-to-r from-blue-500/90 to-blue-600/90 text-white py-4">
           <div className="flex items-center space-x-2">
@@ -70,7 +66,6 @@ const MetaFiado = () => {
       </Card>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Editable Cards */}
         <Card className="shadow-card hover:shadow-card-hover transition-all duration-300 hover-lift">
           <CardHeader className="bg-gradient-to-r from-blue-500/90 to-blue-600/90 text-white">
             <div className="flex items-center space-x-2">
@@ -86,6 +81,7 @@ const MetaFiado = () => {
               value={formatCurrency(data.aberturaVencidoMes)}
               onChange={(e) => handleInputChange('aberturaVencidoMes', e.target.value)}
               className="font-semibold text-xl mt-1"
+              onFocus={(e) => e.target.select()}
             />
           </CardContent>
         </Card>
@@ -147,7 +143,6 @@ const MetaFiado = () => {
           </CardContent>
         </Card>
 
-        {/* Calculated Cards */}
         <Card className="shadow-card hover:shadow-card-hover transition-all duration-300 hover-lift bg-gradient-to-br from-slate-50 to-slate-100">
           <CardHeader className="bg-gradient-to-r from-violet-400/90 to-violet-500/90 text-white">
             <div className="flex items-center space-x-2">

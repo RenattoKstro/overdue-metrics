@@ -10,17 +10,20 @@ const MetaDesafio = () => {
   const { data, updateData, calculateProgress, formatCurrency } = useDashboard();
 
   const handleInputChange = (value: string) => {
-    const numValue = parseFloat(value.replace(/[^\d,-]/g, '').replace(',', '.'));
-    if (!isNaN(numValue)) {
-      updateData('metaDesafio', numValue);
+    const numericValue = value.replace(/[^0-9]/g, '');
+    const floatValue = parseFloat(numericValue) / 100;
+    
+    if (!isNaN(floatValue)) {
+      updateData('metaDesafio', floatValue);
     }
   };
 
   // Cálculos para as barras de progresso
   const progressValue = data.progressoDesafio;
-  const progress96 = calculateProgress((data.metaDesafio - data.vencidoAtual) * 0.96 / data.metaDesafio * 100);
-  const progress98 = calculateProgress((data.metaDesafio - data.vencidoAtual) * 0.98 / data.metaDesafio * 100);
-  const progress100 = calculateProgress((data.metaDesafio - data.vencidoAtual) * 1.00 / data.metaDesafio * 100);
+  const recebidoDesafio = data.aberturaVencidoMes - data.vencidoAtual;
+  const progress96 = calculateProgress((recebidoDesafio / data.metaDesafio * 0.96) * 100);
+  const progress98 = calculateProgress((recebidoDesafio / data.metaDesafio * 0.98) * 100);
+  const progress100 = calculateProgress((recebidoDesafio / data.metaDesafio) * 100);
 
   return (
     <div className="animate-slide-up">
@@ -43,6 +46,7 @@ const MetaDesafio = () => {
                   value={formatCurrency(data.metaDesafio)}
                   onChange={(e) => handleInputChange(e.target.value)}
                   className="font-semibold text-xl"
+                  onFocus={(e) => e.target.select()}
                 />
               </div>
               
@@ -53,6 +57,11 @@ const MetaDesafio = () => {
                   <div className="text-sm text-slate-500">(Meta Desafio ÷ Vencido Atual)</div>
                 </div>
               </div>
+
+              <div className="mb-6">
+                <Label className="block mb-2">Recebido</Label>
+                <div className="text-2xl font-bold text-green-600">{formatCurrency(recebidoDesafio)}</div>
+              </div>
             </div>
             
             <div className="space-y-8">
@@ -61,13 +70,16 @@ const MetaDesafio = () => {
                   <span className="font-medium text-yellow-600 flex items-center">
                     <Trophy className="h-4 w-4 mr-1 text-yellow-500" /> 96%
                   </span>
-                  <span className="text-sm text-slate-600">{formatCurrency((data.metaDesafio - data.vencidoAtual) * 0.96)}</span>
+                  <span className="text-sm text-slate-600">Meta: {formatCurrency(data.metaDesafio * 0.96)}</span>
                 </div>
-                <div className="progress-bar">
+                <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="progress-bar-fill progress-low"
+                    className="h-full bg-yellow-500 transition-all duration-1000"
                     style={{ width: `${progress96}%` }}
                   ></div>
+                </div>
+                <div className="mt-1 text-right text-xs text-slate-500">
+                  {progress96.toFixed(1)}%
                 </div>
               </div>
               
@@ -76,13 +88,16 @@ const MetaDesafio = () => {
                   <span className="font-medium text-orange-600 flex items-center">
                     <Trophy className="h-4 w-4 mr-1 text-orange-500" /> 98%
                   </span>
-                  <span className="text-sm text-slate-600">{formatCurrency((data.metaDesafio - data.vencidoAtual) * 0.98)}</span>
+                  <span className="text-sm text-slate-600">Meta: {formatCurrency(data.metaDesafio * 0.98)}</span>
                 </div>
-                <div className="progress-bar">
+                <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="progress-bar-fill progress-medium"
+                    className="h-full bg-orange-500 transition-all duration-1000"
                     style={{ width: `${progress98}%` }}
                   ></div>
+                </div>
+                <div className="mt-1 text-right text-xs text-slate-500">
+                  {progress98.toFixed(1)}%
                 </div>
               </div>
               
@@ -91,13 +106,16 @@ const MetaDesafio = () => {
                   <span className="font-medium text-green-600 flex items-center">
                     <Trophy className="h-4 w-4 mr-1 text-green-500" /> 100%
                   </span>
-                  <span className="text-sm text-slate-600">{formatCurrency(data.metaDesafio - data.vencidoAtual)}</span>
+                  <span className="text-sm text-slate-600">Meta: {formatCurrency(data.metaDesafio)}</span>
                 </div>
-                <div className="progress-bar">
+                <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="progress-bar-fill progress-high"
+                    className="h-full bg-green-500 transition-all duration-1000"
                     style={{ width: `${progress100}%` }}
                   ></div>
+                </div>
+                <div className="mt-1 text-right text-xs text-slate-500">
+                  {progress100.toFixed(1)}%
                 </div>
               </div>
             </div>

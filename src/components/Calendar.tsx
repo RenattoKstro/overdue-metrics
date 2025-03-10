@@ -28,6 +28,27 @@ const Calendar = () => {
     return workDay?.isWorkDay ?? false;
   };
 
+  // Function to check if a day is today
+  const isToday = (day: number) => {
+    const today = new Date();
+    return today.getDate() === day &&
+           today.getMonth() === data.currentDate.getMonth() &&
+           today.getFullYear() === data.currentDate.getFullYear();
+  };
+
+  // Calculate total work days in month
+  const totalWorkDaysInMonth = data.workDays.filter(day => 
+    day.date.getMonth() === data.currentDate.getMonth() && day.isWorkDay
+  ).length;
+
+  // Calculate remaining work days
+  const today = new Date();
+  const remainingWorkDays = data.workDays.filter(day => 
+    day.date > today && 
+    day.date.getMonth() === today.getMonth() &&
+    day.isWorkDay
+  ).length;
+
   // Function to toggle work day
   const handleToggleWorkDay = (day: number) => {
     const date = new Date(data.currentDate.getFullYear(), data.currentDate.getMonth(), day);
@@ -38,11 +59,17 @@ const Calendar = () => {
   const daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
   return (
-    <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden max-w-lg mx-auto">
+    <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden mx-auto w-full max-w-md">
       <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3">
-        <div className="flex items-center space-x-2">
-          <CalendarIcon className="h-5 w-5" />
-          <CardTitle className="text-lg">{currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)} {currentYear}</CardTitle>
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center space-x-2">
+            <CalendarIcon className="h-5 w-5" />
+            <CardTitle className="text-lg">{currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)} {currentYear}</CardTitle>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Dias úteis no mês: {totalWorkDaysInMonth}</span>
+            <span>Dias úteis restantes: {remainingWorkDays}</span>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-4">
@@ -62,9 +89,12 @@ const Calendar = () => {
               {day !== null ? (
                 <button
                   className={`w-full h-full flex items-center justify-center rounded-md text-xs font-medium transition-colors duration-200 
-                    ${isWorkDay(day) 
-                      ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' 
-                      : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
+                    ${isToday(day)
+                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                      : isWorkDay(day)
+                        ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                        : 'bg-red-50 text-red-500 hover:bg-red-100'
+                    }`}
                   onClick={() => handleToggleWorkDay(day)}
                 >
                   {day}
