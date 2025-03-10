@@ -52,46 +52,96 @@ interface DashboardContextProps {
 
 const DashboardContext = createContext<DashboardContextProps | undefined>(undefined);
 
-export function DashboardProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<DashboardData>({
-    // Meta Fiado (editable)
-    aberturaVencidoMes: 1118083.42,
-    aberturaVencidoDia: 836527.75,
-    metaMes: 448867.63,
-    vencidoAtual: 787154.86,
-    diasRestantes: 0, // Será calculado automaticamente
-    
-    // Meta Fiado (calculated)
-    aReceber: 0,
-    faltaReceberMes: 0,
-    recebidoMes: 0,
-    recebidoHoje: 0,
-    recebimentoPorDia: 0,
-    
-    // Meta Desafio
-    metaDesafio: 446982.1,
-    progressoDesafio: 0,
-    
-    // Meta Vale Alimentação
-    diaCorte: 15,
-    diasUteisRestantesAteCorte: 0,
-    metaValeAlimentacao: 535372.86, // 80% do valor
-    metaBatida: null,
-    
-    // Calendário
-    workDays: Array.from({ length: 31 }, (_, i) => ({
-      date: new Date(new Date().getFullYear(), new Date().getMonth(), i + 1),
-      isWorkDay: ![0, 6].includes(new Date(new Date().getFullYear(), new Date().getMonth(), i + 1).getDay()) // 0 = domingo, 6 = sábado
-    })),
-    
-    // Data atual
-    currentDate: new Date()
-  });
+// Initial default values
+const defaultData: DashboardData = {
+  // Meta Fiado (editable)
+  aberturaVencidoMes: 1118083.42,
+  aberturaVencidoDia: 836527.75,
+  metaMes: 448867.63,
+  vencidoAtual: 787154.86,
+  diasRestantes: 0, // Será calculado automaticamente
   
+  // Meta Fiado (calculated)
+  aReceber: 0,
+  faltaReceberMes: 0,
+  recebidoMes: 0,
+  recebidoHoje: 0,
+  recebimentoPorDia: 0,
+  
+  // Meta Desafio
+  metaDesafio: 446982.1,
+  progressoDesafio: 0,
+  
+  // Meta Vale Alimentação
+  diaCorte: 15,
+  diasUteisRestantesAteCorte: 0,
+  metaValeAlimentacao: 535372.86, // 80% do valor
+  metaBatida: null,
+  
+  // Calendário
+  workDays: Array.from({ length: 31 }, (_, i) => ({
+    date: new Date(new Date().getFullYear(), new Date().getMonth(), i + 1),
+    isWorkDay: ![0, 6].includes(new Date(new Date().getFullYear(), new Date().getMonth(), i + 1).getDay()) // 0 = domingo, 6 = sábado
+  })),
+  
+  // Data atual
+  currentDate: new Date()
+};
+
+// Helper function to convert all dates in workDays array to strings for localStorage
+// and back to dates when retrieving data
+const serializeData = (data: DashboardData): string => {
+  // Create a copy of the data
+  const serializedData = { ...data };
+  
+  // Convert Date objects to strings
+  serializedData.currentDate = data.currentDate.toISOString();
+  serializedData.workDays = data.workDays.map(day => ({
+    date: day.date.toISOString(),
+    isWorkDay: day.isWorkDay
+  }));
+  
+  return JSON.stringify(serializedData);
+};
+
+const deserializeData = (jsonData: string): DashboardData => {
+  const parsedData = JSON.parse(jsonData);
+  
+  // Convert string dates back to Date objects
+  parsedData.currentDate = new Date(parsedData.currentDate);
+  parsedData.workDays = parsedData.workDays.map((day: any) => ({
+    date: new Date(day.date),
+    isWorkDay: day.isWorkDay
+  }));
+  
+  return parsedData;
+};
+
+export function DashboardProvider({ children }: { children: ReactNode }) {
+  // Load data from localStorage if available, otherwise use default data
+  const loadInitialData = (): DashboardData => {
+    const savedData = localStorage.getItem('dashboardData');
+    if (savedData) {
+      try {
+        return deserializeData(savedData);
+      } catch (error) {
+        console.error('Error loading saved data:', error);
+        return defaultData;
+      }
+    }
+    return defaultData;
+  };
+  
+  const [data, setData] = useState<DashboardData>(loadInitialData);
   const [premiosMetaFiado, setPremiosMetaFiado] = useState(0);
   const [premiosMetaDesafio, setPremiosMetaDesafio] = useState(0);
   const [premiosValeAlimentacao, setPremiosValeAlimentacao] = useState(0);
   const [totalPremios, setTotalPremios] = useState(0);
+
+  // Save data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('dashboardData', serializeData(data));
+  }, [data]);
 
   // Função para calcular dias úteis restantes no mês
   const calcularDiasUteisRestantes = () => {
