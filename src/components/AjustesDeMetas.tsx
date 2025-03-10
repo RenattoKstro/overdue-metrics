@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Target } from 'lucide-react';
+import { Calendar as CalendarIcon, Target, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,14 +14,18 @@ const AjustesDeMetas = () => {
     aberturaVencidoDia: formatCurrency(data.aberturaVencidoDia),
     metaMes: formatCurrency(data.metaMes),
     vencidoAtual: formatCurrency(data.vencidoAtual),
-    diaCorte: data.diaCorte.toString(),
+    diasRestantes: data.diaCorte.toString(), // Renomeado de diaCorte para diasRestantes
+    aReceberDesafio: formatCurrency(data.aReceberDesafio || 0),
+    metaDesafio: formatCurrency(data.metaDesafio || 0), // Novo campo para meta do desafio
   });
   const [isEditing, setIsEditing] = useState({
     aberturaVencidoMes: false,
     aberturaVencidoDia: false,
     metaMes: false,
     vencidoAtual: false,
-    diaCorte: false,
+    diasRestantes: false,
+    aReceberDesafio: false,
+    metaDesafio: false,
   });
 
   const handleInputChange = (field: keyof typeof inputs, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,14 +35,19 @@ const AjustesDeMetas = () => {
 
   const handleBlur = (field: keyof typeof inputs) => {
     const numericValue = parseFloat(inputs[field].replace(',', '.')) || 0;
-    updateData(field as keyof DashboardData, field === 'diaCorte' ? parseInt(inputs[field], 10) : numericValue);
+    updateData(
+      field === 'diasRestantes' ? 'diaCorte' : field, // Mapeia diasRestantes para diaCorte
+      field === 'diasRestantes' ? parseInt(inputs[field], 10) : numericValue
+    );
     setInputs(prev => ({ ...prev, [field]: formatCurrency(numericValue) }));
     setIsEditing(prev => ({ ...prev, [field]: false }));
   };
 
   const handleFocus = (field: keyof typeof inputs, e: React.FocusEvent<HTMLInputElement>) => {
     setIsEditing(prev => ({ ...prev, [field]: true }));
-    const rawValue = (data[field as keyof DashboardData] as number).toString().replace('.', ',');
+    const rawValue = (data[field === 'diasRestantes' ? 'diaCorte' : field as keyof DashboardData] as number)
+      .toString()
+      .replace('.', ',');
     setInputs(prev => ({ ...prev, [field]: rawValue }));
     e.target.select();
   };
@@ -59,9 +68,9 @@ const AjustesDeMetas = () => {
   return (
     <div className="animate-slide-up">
       <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300 bg-gradient-to-br from-slate-50 to-slate-100">
-        <CardHeader className="bg-gradient-to-r from-purple-400 to-purple-500 text-white">
+        <CardHeader className="bg-gradient-to-r from-blue-400 to-blue-500 text-white">
           <div className="flex items-center space-x-2">
-            <Target className="h-6 w-6 text-purple-100 animate-float" />
+            <Target className="h-6 w-6 text-blue-100 animate-float" />
             <CardTitle>Ajustes de Metas</CardTitle>
           </div>
         </CardHeader>
@@ -70,77 +79,107 @@ const AjustesDeMetas = () => {
             {/* Campos Editáveis */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div>
-                <Label htmlFor="aberturaVencidoMes" className="block mb-2">Abertura Vencido Mês</Label>
+                <Label htmlFor="aberturaVencidoMes" className="block mb-2 text-sm font-medium text-slate-700">Abertura Vencido Mês</Label>
                 <div className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-purple-500" />
+                  <DollarSign className="h-4 w-4 text-blue-500" />
                   <Input
                     id="aberturaVencidoMes"
                     value={isEditing.aberturaVencidoMes ? inputs.aberturaVencidoMes : formatCurrency(data.aberturaVencidoMes)}
                     onChange={(e) => handleInputChange('aberturaVencidoMes', e)}
                     onBlur={() => handleBlur('aberturaVencidoMes')}
                     onFocus={(e) => handleFocus('aberturaVencidoMes', e)}
-                    className="font-semibold text-xl"
+                    className="font-semibold text-xl border-blue-200 focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="aberturaVencidoDia" className="block mb-2">Abertura Vencido Dia</Label>
+                <Label htmlFor="aberturaVencidoDia" className="block mb-2 text-sm font-medium text-slate-700">Abertura Vencido Dia</Label>
                 <div className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-purple-500" />
+                  <DollarSign className="h-4 w-4 text-blue-500" />
                   <Input
                     id="aberturaVencidoDia"
                     value={isEditing.aberturaVencidoDia ? inputs.aberturaVencidoDia : formatCurrency(data.aberturaVencidoDia)}
                     onChange={(e) => handleInputChange('aberturaVencidoDia', e)}
                     onBlur={() => handleBlur('aberturaVencidoDia')}
                     onFocus={(e) => handleFocus('aberturaVencidoDia', e)}
-                    className="font-semibold text-xl"
+                    className="font-semibold text-xl border-blue-200 focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="metaMes" className="block mb-2">Meta Mês</Label>
+                <Label htmlFor="metaMes" className="block mb-2 text-sm font-medium text-slate-700">Meta Mês</Label>
                 <div className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-purple-500" />
+                  <Target className="h-4 w-4 text-blue-500" />
                   <Input
                     id="metaMes"
                     value={isEditing.metaMes ? inputs.metaMes : formatCurrency(data.metaMes)}
                     onChange={(e) => handleInputChange('metaMes', e)}
                     onBlur={() => handleBlur('metaMes')}
                     onFocus={(e) => handleFocus('metaMes', e)}
-                    className="font-semibold text-xl"
+                    className="font-semibold text-xl border-blue-200 focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="vencidoAtual" className="block mb-2">Vencido Atual</Label>
+                <Label htmlFor="vencidoAtual" className="block mb-2 text-sm font-medium text-slate-700">Vencido Atual</Label>
                 <div className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-purple-500" />
+                  <DollarSign className="h-4 w-4 text-blue-500" />
                   <Input
                     id="vencidoAtual"
                     value={isEditing.vencidoAtual ? inputs.vencidoAtual : formatCurrency(data.vencidoAtual)}
                     onChange={(e) => handleInputChange('vencidoAtual', e)}
                     onBlur={() => handleBlur('vencidoAtual')}
                     onFocus={(e) => handleFocus('vencidoAtual', e)}
-                    className="font-semibold text-xl"
+                    className="font-semibold text-xl border-blue-200 focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="diaCorte" className="block mb-2">Dia de Corte</Label>
+                <Label htmlFor="diasRestantes" className="block mb-2 text-sm font-medium text-slate-700">Dias Restantes</Label>
                 <div className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-purple-500" />
+                  <CalendarIcon className="h-4 w-4 text-blue-500" />
                   <Input
-                    id="diaCorte"
-                    value={isEditing.diaCorte ? inputs.diaCorte : data.diaCorte}
-                    onChange={(e) => handleInputChange('diaCorte', e)}
-                    onBlur={() => handleBlur('diaCorte')}
-                    onFocus={(e) => handleFocus('diaCorte', e)}
-                    className="font-semibold text-xl"
+                    id="diasRestantes"
+                    value={isEditing.diasRestantes ? inputs.diasRestantes : data.diaCorte}
+                    onChange={(e) => handleInputChange('diasRestantes', e)}
+                    onBlur={() => handleBlur('diasRestantes')}
+                    onFocus={(e) => handleFocus('diasRestantes', e)}
+                    className="font-semibold text-xl border-blue-200 focus:border-blue-500"
                     type="number"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="aReceberDesafio" className="block mb-2 text-sm font-medium text-slate-700">A Receber Desafio</Label>
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="h-4 w-4 text-blue-500" />
+                  <Input
+                    id="aReceberDesafio"
+                    value={isEditing.aReceberDesafio ? inputs.aReceberDesafio : formatCurrency(data.aReceberDesafio || 0)}
+                    onChange={(e) => handleInputChange('aReceberDesafio', e)}
+                    onBlur={() => handleBlur('aReceberDesafio')}
+                    onFocus={(e) => handleFocus('aReceberDesafio', e)}
+                    className="font-semibold text-xl border-blue-200 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="metaDesafio" className="block mb-2 text-sm font-medium text-slate-700">Meta Desafio</Label>
+                <div className="flex items-center space-x-2">
+                  <Trophy className="h-4 w-4 text-blue-500" />
+                  <Input
+                    id="metaDesafio"
+                    value={isEditing.metaDesafio ? inputs.metaDesafio : formatCurrency(data.metaDesafio || 0)}
+                    onChange={(e) => handleInputChange('metaDesafio', e)}
+                    onBlur={() => handleBlur('metaDesafio')}
+                    onFocus={(e) => handleFocus('metaDesafio', e)}
+                    className="font-semibold text-xl border-blue-200 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -151,9 +190,9 @@ const AjustesDeMetas = () => {
               {!isCalendarExpanded ? (
                 <Button
                   onClick={() => setIsCalendarExpanded(true)}
-                  className="flex items-center space-x-2 bg-purple-500 hover:bg-purple-600 text-white"
+                  className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white"
                 >
-                  <Calendar className="h-5 w-5" />
+                  <CalendarIcon className="h-5 w-5" />
                   <span>Expandir Calendário</span>
                 </Button>
               ) : (
@@ -162,7 +201,7 @@ const AjustesDeMetas = () => {
                     <h3 className="text-lg font-semibold text-slate-700">Calendário de Dias Úteis</h3>
                     <Button
                       onClick={() => setIsCalendarExpanded(false)}
-                      className="bg-purple-500 hover:bg-purple-600 text-white"
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
                     >
                       Fechar Calendário
                     </Button>
