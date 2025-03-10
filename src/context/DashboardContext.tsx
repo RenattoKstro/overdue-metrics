@@ -143,7 +143,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     ).length;
   };
 
-  useEffect(() => {
+  const updateCalculatedValues = () => {
     const aReceber = data.aberturaVencidoMes - data.metaMes;
     const faltaReceberMes = Math.max(data.vencidoAtual - data.metaMes, 0);
     const recebidoMes = data.aberturaVencidoMes - data.vencidoAtual;
@@ -159,20 +159,14 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     const currentYear = today.getFullYear();
     const cutoffDate = new Date(currentYear, currentMonth, data.diaCorte);
     
-    if (today > cutoffDate && data.metaBatida === null) {
-      const percentageAchieved = (recebidoMes / (aReceber * 0.8)) * 100;
-      setData(prev => ({
-        ...prev,
-        metaBatida: percentageAchieved >= 80
-      }));
-    }
-    
     const diasUteisRestantesAteCorte = data.workDays
       .filter(day => 
         day.isWorkDay && 
         day.date > today && 
         day.date <= cutoffDate
       ).length;
+    
+    const metaValeAlimentacao = aReceber * 0.8;
     
     setData(prev => ({
       ...prev,
@@ -184,8 +178,18 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       progressoDesafio,
       diasUteisRestantesAteCorte,
       diasRestantes: diasRestantesCalculados,
-      metaValeAlimentacao: aReceber * 0.8 // Define metaValeAlimentacao como 80% de aReceber
+      metaValeAlimentacao
     }));
+    
+    // Atualiza metaBatida se já passou do dia de corte
+    if (today > cutoffDate && data.metaBatida === null) {
+      const percentageAchieved = (recebidoMes / metaValeAlimentacao) * 100;
+      updateData('metaBatida', percentageAchieved >= 80);
+    }
+  };
+
+  useEffect(() => {
+    updateCalculatedValues();
     
     const percentMetaFiado = data.vencidoAtual > 0 ? (data.metaMes / data.vencidoAtual) * 100 : 0;
     let premiosFiado = 0;
@@ -217,10 +221,16 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   }, [premiosMetaFiado, premiosMetaDesafio, premiosValeAlimentacao]);
 
   const updateData = (field: keyof DashboardData, value: any) => {
-    setData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setData(prev => {
+      const newData = { ...prev, [field]: value };
+      if (field === 'aberturaVencidoMes' || field === 'metaMes') {
+        const aReceber = newData.aberturaVencidoMes - newData.metaMes;
+        newData.aReceber = aReceber;
+        newData.metaValeAlimentacao = aReceber * 0.8; // Atualiza metaValeAlimentacao imediatamente
+        updateCalculatedValues(); // Recalcula todos os valores dependentes
+      }
+      return newData;
+    });
   };
 
   const toggleWorkDay = (date: Date) => {
