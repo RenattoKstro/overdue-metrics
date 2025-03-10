@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface WorkDay {
@@ -75,7 +74,7 @@ const defaultData: DashboardData = {
   // Meta Vale Alimentação
   diaCorte: 15,
   diasUteisRestantesAteCorte: 0,
-  metaValeAlimentacao: 535372.86, // 80% do valor
+  metaValeAlimentacao: 0, // Inicialmente 0, será calculado dinamicamente
   metaBatida: null,
   
   // Calendário
@@ -91,34 +90,26 @@ const defaultData: DashboardData = {
 // Helper function to convert all dates in workDays array to strings for localStorage
 // and back to dates when retrieving data
 const serializeData = (data: DashboardData): string => {
-  // Create a copy of the data
   const serializedData = { ...data };
-  
-  // Convert Date objects to strings
   serializedData.currentDate = data.currentDate.toISOString();
   serializedData.workDays = data.workDays.map(day => ({
     date: day.date.toISOString(),
     isWorkDay: day.isWorkDay
   }));
-  
   return JSON.stringify(serializedData);
 };
 
 const deserializeData = (jsonData: string): DashboardData => {
   const parsedData = JSON.parse(jsonData);
-  
-  // Convert string dates back to Date objects
   parsedData.currentDate = new Date(parsedData.currentDate);
   parsedData.workDays = parsedData.workDays.map((day: any) => ({
     date: new Date(day.date),
     isWorkDay: day.isWorkDay
   }));
-  
   return parsedData;
 };
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
-  // Load data from localStorage if available, otherwise use default data
   const loadInitialData = (): DashboardData => {
     const savedData = localStorage.getItem('dashboardData');
     if (savedData) {
@@ -138,17 +129,13 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [premiosValeAlimentacao, setPremiosValeAlimentacao] = useState(0);
   const [totalPremios, setTotalPremios] = useState(0);
 
-  // Save data to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('dashboardData', serializeData(data));
   }, [data]);
 
-  // Função para calcular dias úteis restantes no mês
   const calcularDiasUteisRestantes = () => {
     const today = new Date();
     const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    
-    // Filtrar apenas os dias úteis até o fim do mês
     return data.workDays.filter(day => 
       day.isWorkDay && 
       day.date > today && 
@@ -156,38 +143,30 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     ).length;
   };
 
-  // Atualiza os valores calculados quando os valores editáveis mudam
   useEffect(() => {
     const aReceber = data.aberturaVencidoMes - data.metaMes;
-    const faltaReceberMes = data.vencidoAtual - data.metaMes;
+    const faltaReceberMes = Math.max(data.vencidoAtual - data.metaMes, 0);
     const recebidoMes = data.aberturaVencidoMes - data.vencidoAtual;
     const recebidoHoje = data.aberturaVencidoDia - data.vencidoAtual;
     
-    // Calcular dias úteis restantes automaticamente
     const diasRestantesCalculados = calcularDiasUteisRestantes();
-    
     const recebimentoPorDia = diasRestantesCalculados > 0 ? faltaReceberMes / diasRestantesCalculados : 0;
     
-    // Corrigir o cálculo do progresso da Meta Desafio
-    // Meta Desafio é quanto queremos que o vencido atual alcance (redução do vencido)
-    // Por isso, quanto menor o vencido atual em relação à meta desafio, maior o progresso
     const progressoDesafio = data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
     
-    // Calcula dias úteis até o dia de corte
     const today = new Date();
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
     const cutoffDate = new Date(currentYear, currentMonth, data.diaCorte);
     
-    // Se já passou do dia de corte, define metaBatida como false
-    if (today > cutoffDate) {
+    if (today > cutoffDate && data.metaBatida === null) {
+      const percentageAchieved = (recebidoMes / (aReceber * 0.8)) * 100;
       setData(prev => ({
         ...prev,
-        metaBatida: prev.metaBatida === null ? false : prev.metaBatida
+        metaBatida: percentageAchieved >= 80
       }));
     }
     
-    // Calcula dias úteis restantes até o dia de corte
     const diasUteisRestantesAteCorte = data.workDays
       .filter(day => 
         day.isWorkDay && 
@@ -204,14 +183,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       recebimentoPorDia,
       progressoDesafio,
       diasUteisRestantesAteCorte,
-      diasRestantes: diasRestantesCalculados
+      diasRestantes: diasRestantesCalculados,
+      metaValeAlimentacao: aReceber * 0.8 // Define metaValeAlimentacao como 80% de aReceber
     }));
     
-    // Calcula prêmios Meta Fiado
-    // Corrigido: percentMetaFiado = (metaMes / vencidoAtual) * 100
     const percentMetaFiado = data.vencidoAtual > 0 ? (data.metaMes / data.vencidoAtual) * 100 : 0;
     let premiosFiado = 0;
-    
     if (percentMetaFiado >= 94) premiosFiado += 52.50;
     if (percentMetaFiado >= 96) premiosFiado += 63.00;
     if (percentMetaFiado >= 98) premiosFiado += 84.00;
@@ -220,31 +197,21 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     if (percentMetaFiado >= 101) premiosFiado += 84.00;
     if (percentMetaFiado >= 103) premiosFiado += 84.00;
     if (percentMetaFiado >= 105) premiosFiado += 84.00;
-    
     setPremiosMetaFiado(premiosFiado);
     
-    // Calcula prêmios Meta Desafio
-    // Meta Desafio / Vencido Atual é o percentual de progresso
     const percentMetaDesafio = data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
     let premiosDesafio = 0;
-    
     if (percentMetaDesafio >= 96) premiosDesafio += 200.00;
     if (percentMetaDesafio >= 98) premiosDesafio += 150.00;
     if (percentMetaDesafio >= 100) premiosDesafio += 150.00;
-    
     setPremiosMetaDesafio(premiosDesafio);
     
-    // Calcula prêmio Vale Alimentação
     let premioVale = 0;
-    if (data.metaBatida === true) {
-      premioVale = 100.00;
-    }
-    
+    if (data.metaBatida === true) premioVale = 100.00;
     setPremiosValeAlimentacao(premioVale);
     
   }, [data.aberturaVencidoMes, data.aberturaVencidoDia, data.metaMes, data.vencidoAtual, data.metaDesafio, data.workDays, data.diaCorte, data.metaBatida]);
 
-  // Atualiza o total de prêmios
   useEffect(() => {
     setTotalPremios(premiosMetaFiado + premiosMetaDesafio + premiosValeAlimentacao);
   }, [premiosMetaFiado, premiosMetaDesafio, premiosValeAlimentacao]);
@@ -260,7 +227,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setData(prev => ({
       ...prev,
       workDays: prev.workDays.map(day => 
-        day.date.getDate() === date.getDate() && day.date.getMonth() === date.getMonth()
+        day.date.getTime() === date.getTime()
           ? { ...day, isWorkDay: !day.isWorkDay }
           : day
       )
