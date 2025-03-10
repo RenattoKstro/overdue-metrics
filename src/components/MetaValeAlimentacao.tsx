@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Utensils, AlertTriangle, Calendar, BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 const MetaValeAlimentacao = () => {
   const { data, updateData, formatCurrency } = useDashboard();
   
-  // Valores para a barra de progresso
+  // Valores para a barra de progresso - recebe atualizações do Meta Fiado
   const valorJaRecebido = data.aberturaVencidoMes - data.vencidoAtual;
   const percentageReached = data.metaValeAlimentacao !== 0 
     ? (valorJaRecebido / data.metaValeAlimentacao) * 100

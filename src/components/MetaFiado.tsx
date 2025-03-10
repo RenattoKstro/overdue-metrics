@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Wallet, Calendar, Sunrise, Target, AlertTriangle, ArrowDown, CheckCircle, Building, BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +10,9 @@ import { Badge } from '@/components/ui/badge';
 const MetaFiado = () => {
   const { data, updateData, formatCurrency } = useDashboard();
   
-  const percentageReached = data.metaMes !== 0 
-    ? (data.recebidoMes / data.metaMes) * 100
+  // Percentual correto: Meta do Mês ÷ Vencido Atual
+  const percentageReached = data.vencidoAtual !== 0 
+    ? (data.metaMes / data.vencidoAtual) * 100
     : 0;
     
   const progressValue = Math.min(Math.max(percentageReached, 0), 100);
@@ -25,8 +27,11 @@ const MetaFiado = () => {
   }
 
   const handleInputChange = (field: keyof typeof data, value: string) => {
-    const numericValue = value.replace(/[^0-9]/g, '');
-    const floatValue = parseFloat(numericValue) / 100;
+    // Remove qualquer caractere que não seja número, vírgula ou ponto
+    const numericValue = value.replace(/[^\d,.]/g, '')
+                              .replace(',', '.'); // Substitui vírgula por ponto
+    
+    const floatValue = parseFloat(numericValue);
     
     if (!isNaN(floatValue)) {
       updateData(field, floatValue);

@@ -117,7 +117,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     const diasRestantesCalculados = calcularDiasUteisRestantes();
     
     const recebimentoPorDia = diasRestantesCalculados > 0 ? faltaReceberMes / diasRestantesCalculados : 0;
-    const progressoDesafio = (data.metaDesafio / data.vencidoAtual) * 100;
+    
+    // Corrigir o cálculo do progresso da Meta Desafio
+    // Meta Desafio é quanto queremos que o vencido atual alcance (redução do vencido)
+    // Por isso, quanto menor o vencido atual em relação à meta desafio, maior o progresso
+    const progressoDesafio = data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
     
     // Calcula dias úteis até o dia de corte
     const today = new Date();
@@ -129,7 +133,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     if (today > cutoffDate) {
       setData(prev => ({
         ...prev,
-        metaBatida: false
+        metaBatida: prev.metaBatida === null ? false : prev.metaBatida
       }));
     }
     
@@ -154,7 +158,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }));
     
     // Calcula prêmios Meta Fiado
-    const percentMetaFiado = data.metaMes > 0 ? (recebidoMes / data.metaMes) * 100 : 0;
+    // Corrigido: percentMetaFiado = (metaMes / vencidoAtual) * 100
+    const percentMetaFiado = data.vencidoAtual > 0 ? (data.metaMes / data.vencidoAtual) * 100 : 0;
     let premiosFiado = 0;
     
     if (percentMetaFiado >= 94) premiosFiado += 52.50;
@@ -169,6 +174,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setPremiosMetaFiado(premiosFiado);
     
     // Calcula prêmios Meta Desafio
+    // Meta Desafio / Vencido Atual é o percentual de progresso
     const percentMetaDesafio = data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
     let premiosDesafio = 0;
     

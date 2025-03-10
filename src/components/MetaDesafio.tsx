@@ -10,8 +10,11 @@ const MetaDesafio = () => {
   const { data, updateData, calculateProgress, formatCurrency } = useDashboard();
 
   const handleInputChange = (value: string) => {
-    const numericValue = value.replace(/[^0-9]/g, '');
-    const floatValue = parseFloat(numericValue) / 100;
+    // Remove qualquer caractere que não seja número, vírgula ou ponto
+    const numericValue = value.replace(/[^\d,.]/g, '')
+                              .replace(',', '.'); // Substitui vírgula por ponto
+    
+    const floatValue = parseFloat(numericValue);
     
     if (!isNaN(floatValue)) {
       updateData('metaDesafio', floatValue);
@@ -21,9 +24,16 @@ const MetaDesafio = () => {
   // Cálculos para as barras de progresso
   const progressValue = data.progressoDesafio;
   const recebidoDesafio = data.aberturaVencidoMes - data.vencidoAtual;
-  const progress96 = calculateProgress((recebidoDesafio / data.metaDesafio * 0.96) * 100);
-  const progress98 = calculateProgress((recebidoDesafio / data.metaDesafio * 0.98) * 100);
-  const progress100 = calculateProgress((recebidoDesafio / data.metaDesafio) * 100);
+  
+  // Calcular valores restantes para atingir as metas
+  const valorFaltante96 = Math.max(data.vencidoAtual - (data.metaDesafio * 0.96), 0);
+  const valorFaltante98 = Math.max(data.vencidoAtual - (data.metaDesafio * 0.98), 0);
+  const valorFaltante100 = Math.max(data.vencidoAtual - data.metaDesafio, 0);
+  
+  // Calcular progresso para cada meta
+  const progress96 = calculateProgress((data.metaDesafio * 0.96 / data.vencidoAtual) * 100);
+  const progress98 = calculateProgress((data.metaDesafio * 0.98 / data.vencidoAtual) * 100);
+  const progress100 = calculateProgress((data.metaDesafio / data.vencidoAtual) * 100);
 
   return (
     <div className="animate-slide-up">
@@ -78,8 +88,11 @@ const MetaDesafio = () => {
                     style={{ width: `${progress96}%` }}
                   ></div>
                 </div>
-                <div className="mt-1 text-right text-xs text-slate-500">
-                  {progress96.toFixed(1)}%
+                <div className="mt-1 flex justify-between text-xs">
+                  <span className="text-slate-500">{progress96.toFixed(1)}%</span>
+                  <span className="text-red-500 font-medium">
+                    Falta receber: {formatCurrency(valorFaltante96)}
+                  </span>
                 </div>
               </div>
               
@@ -96,8 +109,11 @@ const MetaDesafio = () => {
                     style={{ width: `${progress98}%` }}
                   ></div>
                 </div>
-                <div className="mt-1 text-right text-xs text-slate-500">
-                  {progress98.toFixed(1)}%
+                <div className="mt-1 flex justify-between text-xs">
+                  <span className="text-slate-500">{progress98.toFixed(1)}%</span>
+                  <span className="text-red-500 font-medium">
+                    Falta receber: {formatCurrency(valorFaltante98)}
+                  </span>
                 </div>
               </div>
               
@@ -114,8 +130,11 @@ const MetaDesafio = () => {
                     style={{ width: `${progress100}%` }}
                   ></div>
                 </div>
-                <div className="mt-1 text-right text-xs text-slate-500">
-                  {progress100.toFixed(1)}%
+                <div className="mt-1 flex justify-between text-xs">
+                  <span className="text-slate-500">{progress100.toFixed(1)}%</span>
+                  <span className="text-red-500 font-medium">
+                    Falta receber: {formatCurrency(valorFaltante100)}
+                  </span>
                 </div>
               </div>
             </div>
