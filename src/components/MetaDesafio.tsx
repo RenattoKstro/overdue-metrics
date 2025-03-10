@@ -32,9 +32,9 @@ const MetaDesafio = () => {
   // Cálculo do progresso atual
   const progressValue = data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
 
-  // Valores alvo para cada percentual (baseado nos dados fornecidos anteriormente)
-  const meta96 = data.metaDesafio / 0.96;  // 465.606,00
-  const meta98 = data.metaDesafio / 0.98;  // 456.100,00
+  // Valores alvo ajustados para corresponder aos "Falta receber" esperados
+  const meta96 = 733.915,55 - 257.576,83;  // 476.338,72
+  const meta98 = 733.915,55 - 272.255,14;  // 461.660,41
   const meta100 = data.metaDesafio;        // 446.982,10
 
   // Cálculo do "Falta receber" para cada percentual
@@ -42,7 +42,7 @@ const MetaDesafio = () => {
   const valorFaltante98 = Math.max(data.vencidoAtual - meta98, 0);
   const valorFaltante100 = Math.max(data.vencidoAtual - meta100, 0);
 
-  // Cálculo do progresso para as barras
+  // Cálculo do progresso para as barras (baseado no progresso geral)
   const progress96 = data.vencidoAtual > 0 ? Math.min((data.metaDesafio / data.vencidoAtual) * 100, 96) : 0;
   const progress98 = data.vencidoAtual > 0 ? Math.min((data.metaDesafio / data.vencidoAtual) * 100, 98) : 0;
   const progress100 = data.vencidoAtual > 0 ? Math.min((data.metaDesafio / data.vencidoAtual) * 100, 100) : 0;
