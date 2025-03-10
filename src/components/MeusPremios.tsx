@@ -5,7 +5,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDashboard } from '@/context/DashboardContext';
 
 const MeusPremios = () => {
-  const { formatCurrency, premiosMetaFiado, premiosMetaDesafio, premiosValeAlimentacao, totalPremios } = useDashboard();
+  const { data, formatCurrency, premiosMetaFiado, premiosMetaDesafio, premiosValeAlimentacao, totalPremios } = useDashboard();
+
+  // Calcular os percentuais reais com base nos dados atuais
+  const calcularPercentualMetaFiado = () => {
+    if (data.metaMes <= 0) return 0;
+    return (data.recebidoMes / data.metaMes) * 100;
+  };
+
+  const calcularPercentualMetaDesafio = () => {
+    if (data.vencidoAtual <= 0) return 0;
+    return (data.metaDesafio / data.vencidoAtual) * 100;
+  };
+
+  const percentMetaFiado = calcularPercentualMetaFiado();
+  const percentMetaDesafio = calcularPercentualMetaDesafio();
+  const metaValeAlimentacaoAtingida = data.metaBatida === true;
 
   const renderPremioStatus = (threshold: number, currentValue: number, reward: number, icon: JSX.Element) => {
     const isAchieved = currentValue >= threshold;
@@ -34,11 +49,6 @@ const MeusPremios = () => {
     );
   };
 
-  // Calcular percentual atingido para cada meta (valores fictícios para demonstração)
-  const percentMetaFiado = 97; // Simulando que atingiu 97%
-  const percentMetaDesafio = 96; // Simulando que atingiu 96%
-  const metaValeAlimentacaoAtingida = premiosValeAlimentacao > 0; // Se o prêmio é maior que zero, a meta foi atingida
-
   return (
     <div className="animate-slide-up">
       <Card className="shadow-premium hover:shadow-card-hover transition-shadow duration-300 bg-gradient-to-br from-slate-50 to-slate-100">
@@ -55,7 +65,7 @@ const MeusPremios = () => {
               <CardHeader className="bg-gradient-to-r from-blue-400/90 to-blue-500/90 text-white py-4">
                 <div className="flex items-center space-x-2">
                   <Wallet className="h-5 w-5" />
-                  <CardTitle className="text-base">Meta Fiado</CardTitle>
+                  <CardTitle className="text-base">Meta Fiado ({percentMetaFiado.toFixed(2)}%)</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="p-4">
@@ -81,7 +91,7 @@ const MeusPremios = () => {
               <CardHeader className="bg-gradient-to-r from-yellow-400/90 to-yellow-500/90 text-white py-4">
                 <div className="flex items-center space-x-2">
                   <Trophy className="h-5 w-5" />
-                  <CardTitle className="text-base">Meta Desafio</CardTitle>
+                  <CardTitle className="text-base">Meta Desafio ({percentMetaDesafio.toFixed(2)}%)</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="p-4">

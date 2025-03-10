@@ -59,7 +59,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     aberturaVencidoDia: 836527.75,
     metaMes: 448867.63,
     vencidoAtual: 787154.86,
-    diasRestantes: 17,
+    diasRestantes: 0, // Será calculado automaticamente
     
     // Meta Fiado (calculated)
     aReceber: 0,
@@ -93,13 +93,30 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [premiosValeAlimentacao, setPremiosValeAlimentacao] = useState(0);
   const [totalPremios, setTotalPremios] = useState(0);
 
+  // Função para calcular dias úteis restantes no mês
+  const calcularDiasUteisRestantes = () => {
+    const today = new Date();
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    // Filtrar apenas os dias úteis até o fim do mês
+    return data.workDays.filter(day => 
+      day.isWorkDay && 
+      day.date > today && 
+      day.date <= lastDayOfMonth
+    ).length;
+  };
+
   // Atualiza os valores calculados quando os valores editáveis mudam
   useEffect(() => {
     const aReceber = data.aberturaVencidoMes - data.metaMes;
     const faltaReceberMes = data.vencidoAtual - data.metaMes;
     const recebidoMes = data.aberturaVencidoMes - data.vencidoAtual;
     const recebidoHoje = data.aberturaVencidoDia - data.vencidoAtual;
-    const recebimentoPorDia = data.diasRestantes > 0 ? faltaReceberMes / data.diasRestantes : 0;
+    
+    // Calcular dias úteis restantes automaticamente
+    const diasRestantesCalculados = calcularDiasUteisRestantes();
+    
+    const recebimentoPorDia = diasRestantesCalculados > 0 ? faltaReceberMes / diasRestantesCalculados : 0;
     const progressoDesafio = (data.metaDesafio / data.vencidoAtual) * 100;
     
     // Calcula dias úteis até o dia de corte
@@ -132,12 +149,13 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       recebidoHoje,
       recebimentoPorDia,
       progressoDesafio,
-      diasUteisRestantesAteCorte
+      diasUteisRestantesAteCorte,
+      diasRestantes: diasRestantesCalculados
     }));
     
     // Calcula prêmios Meta Fiado
+    const percentMetaFiado = data.metaMes > 0 ? (recebidoMes / data.metaMes) * 100 : 0;
     let premiosFiado = 0;
-    const percentMetaFiado = (recebidoMes / data.metaMes) * 100;
     
     if (percentMetaFiado >= 94) premiosFiado += 52.50;
     if (percentMetaFiado >= 96) premiosFiado += 63.00;
@@ -151,8 +169,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setPremiosMetaFiado(premiosFiado);
     
     // Calcula prêmios Meta Desafio
+    const percentMetaDesafio = data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
     let premiosDesafio = 0;
-    const percentMetaDesafio = (data.metaDesafio / data.vencidoAtual) * 100;
     
     if (percentMetaDesafio >= 96) premiosDesafio += 200.00;
     if (percentMetaDesafio >= 98) premiosDesafio += 150.00;
@@ -168,7 +186,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     
     setPremiosValeAlimentacao(premioVale);
     
-  }, [data.aberturaVencidoMes, data.aberturaVencidoDia, data.metaMes, data.vencidoAtual, data.diasRestantes, data.metaDesafio, data.workDays, data.diaCorte, data.metaBatida]);
+  }, [data.aberturaVencidoMes, data.aberturaVencidoDia, data.metaMes, data.vencidoAtual, data.metaDesafio, data.workDays, data.diaCorte, data.metaBatida]);
 
   // Atualiza o total de prêmios
   useEffect(() => {

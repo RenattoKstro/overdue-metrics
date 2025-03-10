@@ -81,7 +81,7 @@ const MetaValeAlimentacao = () => {
               
               {data.metaBatida === true ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center">
-                  <Badge variant="success" className="mr-2 bg-green-500">Meta Batida</Badge>
+                  <Badge variant="outline" className="mr-2 bg-green-500 text-white">Meta Batida</Badge>
                   <p className="text-green-700 text-sm">Parabéns! Você atingiu a meta do vale alimentação.</p>
                 </div>
               ) : data.metaBatida === false ? (

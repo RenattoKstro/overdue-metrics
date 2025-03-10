@@ -38,20 +38,20 @@ const Calendar = () => {
   const daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
   return (
-    <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+    <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden max-w-lg mx-auto">
+      <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3">
         <div className="flex items-center space-x-2">
-          <CalendarIcon className="h-6 w-6" />
-          <CardTitle>Calendário - {currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)} {currentYear}</CardTitle>
+          <CalendarIcon className="h-5 w-5" />
+          <CardTitle className="text-lg">{currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)} {currentYear}</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="p-6">
-        <p className="text-sm text-slate-600 mb-4">
-          Selecione os dias sem expediente. Os dias restantes serão considerados dias úteis para cálculos.
+      <CardContent className="p-4">
+        <p className="text-xs text-slate-600 mb-3">
+          Selecione os dias sem expediente.
         </p>
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        <div className="grid grid-cols-7 gap-1 mb-1">
           {daysOfWeek.map((day, index) => (
-            <div key={index} className="text-center font-semibold text-sm py-2">
+            <div key={index} className="text-center font-semibold text-xs py-1">
               {day}
             </div>
           ))}
@@ -61,7 +61,7 @@ const Calendar = () => {
             <div key={index} className="aspect-square">
               {day !== null ? (
                 <button
-                  className={`w-full h-full flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-200 
+                  className={`w-full h-full flex items-center justify-center rounded-md text-xs font-medium transition-colors duration-200 
                     ${isWorkDay(day) 
                       ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' 
                       : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
