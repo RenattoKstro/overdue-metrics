@@ -1,283 +1,107 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface WorkDay {
-  date: Date;
-  isWorkDay: boolean;
-}
+import React, { createContext, useContext, useState } from 'react';
 
 interface DashboardData {
-  // Meta Fiado (editable)
+  metaMes: number;
   aberturaVencidoMes: number;
   aberturaVencidoDia: number;
-  metaMes: number;
   vencidoAtual: number;
-  diasRestantes: number;
-  
-  // Meta Fiado (calculated)
+  diaCorte: number;
   aReceber: number;
-  faltaReceberMes: number;
   recebidoMes: number;
   recebidoHoje: number;
+  faltaReceberMes: number;
+  diasRestantes: number;
   recebimentoPorDia: number;
-  
-  // Meta Desafio
-  metaDesafio: number;
+  workDays: { date: Date; isWorkDay: boolean }[];
+  aReceberDesafio: number;
+  recebidoDesafioMes: number;
+  faltaReceberDesafioMes: number;
   progressoDesafio: number;
-  
-  // Meta Vale Alimentação
-  diaCorte: number;
-  diasUteisRestantesAteCorte: number;
-  metaValeAlimentacao: number; // 80% do valor
-  metaBatida: boolean | null;
-  
-  // Calendário
-  workDays: WorkDay[];
-  
-  // Data atual
-  currentDate: Date;
+  metaDesafio: number; // Adicionado
 }
 
-interface DashboardContextProps {
+interface DashboardContextType {
   data: DashboardData;
-  updateData: (field: keyof DashboardData, value: any) => void;
+  updateData: (key: keyof DashboardData, value: number | Date | boolean) => void;
   toggleWorkDay: (date: Date) => void;
-  calculateProgress: (value: number) => number;
   formatCurrency: (value: number) => string;
-  premiosMetaFiado: number;
-  premiosMetaDesafio: number;
-  premiosValeAlimentacao: number;
-  totalPremios: number;
 }
 
-const DashboardContext = createContext<DashboardContextProps | undefined>(undefined);
+const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
-// Initial default values
-const defaultData: DashboardData = {
-  // Meta Fiado (editable)
-  aberturaVencidoMes: 1118083.42,
-  aberturaVencidoDia: 836527.75,
-  metaMes: 448867.63,
-  vencidoAtual: 787154.86,
-  diasRestantes: 0, // Será calculado automaticamente
-  
-  // Meta Fiado (calculated)
-  aReceber: 0,
-  faltaReceberMes: 0,
-  recebidoMes: 0,
-  recebidoHoje: 0,
-  recebimentoPorDia: 0,
-  
-  // Meta Desafio
-  metaDesafio: 446982.1,
-  progressoDesafio: 0,
-  
-  // Meta Vale Alimentação
-  diaCorte: 15,
-  diasUteisRestantesAteCorte: 0,
-  metaValeAlimentacao: 0, // Inicialmente 0, será calculado dinamicamente
-  metaBatida: null,
-  
-  // Calendário
-  workDays: Array.from({ length: 31 }, (_, i) => ({
-    date: new Date(new Date().getFullYear(), new Date().getMonth(), i + 1),
-    isWorkDay: ![0, 6].includes(new Date(new Date().getFullYear(), new Date().getMonth(), i + 1).getDay()) // 0 = domingo, 6 = sábado
-  })),
-  
-  // Data atual
-  currentDate: new Date()
-};
+export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [data, setData] = useState<DashboardData>({
+    metaMes: 10000,
+    aberturaVencidoMes: 2000,
+    aberturaVencidoDia: 500,
+    vencidoAtual: 1500,
+    diaCorte: 25,
+    aReceber: 8000,
+    recebidoMes: 4000,
+    recebidoHoje: 200,
+    faltaReceberMes: 4000,
+    diasRestantes: 15,
+    recebimentoPorDia: 266.67,
+    workDays: [],
+    aReceberDesafio: 5000,
+    recebidoDesafioMes: 3000,
+    faltaReceberDesafioMes: 2000,
+    progressoDesafio: 60,
+    metaDesafio: 5000, // Valor inicial para meta do desafio
+  });
 
-// Helper function to convert all dates in workDays array to strings for localStorage
-// and back to dates when retrieving data
-const serializeData = (data: DashboardData): string => {
-  const serializedData = { ...data };
-  serializedData.currentDate = data.currentDate.toISOString();
-  serializedData.workDays = data.workDays.map(day => ({
-    date: day.date.toISOString(),
-    isWorkDay: day.isWorkDay
-  }));
-  return JSON.stringify(serializedData);
-};
-
-const deserializeData = (jsonData: string): DashboardData => {
-  const parsedData = JSON.parse(jsonData);
-  parsedData.currentDate = new Date(parsedData.currentDate);
-  parsedData.workDays = parsedData.workDays.map((day: any) => ({
-    date: new Date(day.date),
-    isWorkDay: day.isWorkDay
-  }));
-  return parsedData;
-};
-
-export function DashboardProvider({ children }: { children: ReactNode }) {
-  const loadInitialData = (): DashboardData => {
-    const savedData = localStorage.getItem('dashboardData');
-    if (savedData) {
-      try {
-        return deserializeData(savedData);
-      } catch (error) {
-        console.error('Error loading saved data:', error);
-        return defaultData;
-      }
-    }
-    return defaultData;
-  };
-  
-  const [data, setData] = useState<DashboardData>(loadInitialData);
-  const [premiosMetaFiado, setPremiosMetaFiado] = useState(0);
-  const [premiosMetaDesafio, setPremiosMetaDesafio] = useState(0);
-  const [premiosValeAlimentacao, setPremiosValeAlimentacao] = useState(0);
-  const [totalPremios, setTotalPremios] = useState(0);
-
-  useEffect(() => {
-    localStorage.setItem('dashboardData', serializeData(data));
-  }, [data]);
-
-  const calcularDiasUteisRestantes = () => {
-    const today = new Date();
-    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    return data.workDays.filter(day => 
-      day.isWorkDay && 
-      day.date > today && 
-      day.date <= lastDayOfMonth
-    ).length;
-  };
-
-  const updateCalculatedValues = () => {
-    const aReceber = data.aberturaVencidoMes - data.metaMes;
-    const faltaReceberMes = Math.max(data.vencidoAtual - data.metaMes, 0);
-    const recebidoMes = data.aberturaVencidoMes - data.vencidoAtual;
-    const recebidoHoje = data.aberturaVencidoDia - data.vencidoAtual;
-    
-    const diasRestantesCalculados = calcularDiasUteisRestantes();
-    const recebimentoPorDia = diasRestantesCalculados > 0 ? faltaReceberMes / diasRestantesCalculados : 0;
-    
-    const progressoDesafio = data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
-    
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    const cutoffDate = new Date(currentYear, currentMonth, data.diaCorte);
-    
-    const diasUteisRestantesAteCorte = data.workDays
-      .filter(day => 
-        day.isWorkDay && 
-        day.date > today && 
-        day.date <= cutoffDate
-      ).length;
-    
-    const metaValeAlimentacao = aReceber * 0.8;
-    
-    setData(prev => ({
-      ...prev,
-      aReceber,
-      faltaReceberMes,
-      recebidoMes,
-      recebidoHoje,
-      recebimentoPorDia,
-      progressoDesafio,
-      diasUteisRestantesAteCorte,
-      diasRestantes: diasRestantesCalculados,
-      metaValeAlimentacao
-    }));
-    
-    // Atualiza metaBatida se já passou do dia de corte
-    if (today > cutoffDate && data.metaBatida === null) {
-      const percentageAchieved = (recebidoMes / metaValeAlimentacao) * 100;
-      updateData('metaBatida', percentageAchieved >= 80);
-    }
-  };
-
-  useEffect(() => {
-    updateCalculatedValues();
-    
-    const percentMetaFiado = data.vencidoAtual > 0 ? (data.metaMes / data.vencidoAtual) * 100 : 0;
-    let premiosFiado = 0;
-    if (percentMetaFiado >= 94) premiosFiado += 52.50;
-    if (percentMetaFiado >= 96) premiosFiado += 63.00;
-    if (percentMetaFiado >= 98) premiosFiado += 84.00;
-    if (percentMetaFiado >= 99) premiosFiado += 94.50;
-    if (percentMetaFiado >= 100) premiosFiado += 241.50;
-    if (percentMetaFiado >= 101) premiosFiado += 84.00;
-    if (percentMetaFiado >= 103) premiosFiado += 84.00;
-    if (percentMetaFiado >= 105) premiosFiado += 84.00;
-    setPremiosMetaFiado(premiosFiado);
-    
-    const percentMetaDesafio = data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
-    let premiosDesafio = 0;
-    if (percentMetaDesafio >= 96) premiosDesafio += 200.00;
-    if (percentMetaDesafio >= 98) premiosDesafio += 150.00;
-    if (percentMetaDesafio >= 100) premiosDesafio += 150.00;
-    setPremiosMetaDesafio(premiosDesafio);
-    
-    let premioVale = 0;
-    if (data.metaBatida === true) premioVale = 100.00;
-    setPremiosValeAlimentacao(premioVale);
-    
-  }, [data.aberturaVencidoMes, data.aberturaVencidoDia, data.metaMes, data.vencidoAtual, data.metaDesafio, data.workDays, data.diaCorte, data.metaBatida]);
-
-  useEffect(() => {
-    setTotalPremios(premiosMetaFiado + premiosMetaDesafio + premiosValeAlimentacao);
-  }, [premiosMetaFiado, premiosMetaDesafio, premiosValeAlimentacao]);
-
-  const updateData = (field: keyof DashboardData, value: any) => {
+  const updateData = (key: keyof DashboardData, value: number | Date | boolean) => {
     setData(prev => {
-      const newData = { ...prev, [field]: value };
-      if (field === 'aberturaVencidoMes' || field === 'metaMes') {
-        const aReceber = newData.aberturaVencidoMes - newData.metaMes;
-        newData.aReceber = aReceber;
-        newData.metaValeAlimentacao = aReceber * 0.8; // Atualiza metaValeAlimentacao imediatamente
-        updateCalculatedValues(); // Recalcula todos os valores dependentes
+      const newData = { ...prev, [key]: value };
+      // Recalcular faltaReceberDesafioMes com base em aReceberDesafio e recebidoDesafioMes
+      if (key === 'aReceberDesafio' || key === 'recebidoDesafioMes' || key === 'metaDesafio') {
+        newData.faltaReceberDesafioMes = (newData.aReceberDesafio || 0) - (newData.recebidoDesafioMes || 0);
+        newData.progressoDesafio = newData.metaDesafio
+          ? ((newData.recebidoDesafioMes || 0) / newData.metaDesafio) * 100
+          : 0;
       }
       return newData;
     });
   };
 
   const toggleWorkDay = (date: Date) => {
-    setData(prev => ({
-      ...prev,
-      workDays: prev.workDays.map(day => 
-        day.date.getTime() === date.getTime()
-          ? { ...day, isWorkDay: !day.isWorkDay }
-          : day
-      )
-    }));
-  };
-
-  const calculateProgress = (value: number) => {
-    return Math.min(Math.max(value, 0), 100);
+    setData(prev => {
+      const existingDay = prev.workDays.find(wd => wd.date.toDateString() === date.toDateString());
+      if (existingDay) {
+        return {
+          ...prev,
+          workDays: prev.workDays.map(wd =>
+            wd.date.toDateString() === date.toDateString()
+              ? { ...wd, isWorkDay: !wd.isWorkDay }
+              : wd
+          ),
+        };
+      }
+      return {
+        ...prev,
+        workDays: [...prev.workDays, { date, isWorkDay: true }],
+      };
+    });
   };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'BRL',
     }).format(value);
   };
 
   return (
-    <DashboardContext.Provider 
-      value={{ 
-        data, 
-        updateData, 
-        toggleWorkDay, 
-        calculateProgress, 
-        formatCurrency,
-        premiosMetaFiado,
-        premiosMetaDesafio,
-        premiosValeAlimentacao,
-        totalPremios
-      }}
-    >
+    <DashboardContext.Provider value={{ data, updateData, toggleWorkDay, formatCurrency }}>
       {children}
     </DashboardContext.Provider>
   );
-}
+};
 
-export function useDashboard() {
+export const useDashboard = () => {
   const context = useContext(DashboardContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useDashboard must be used within a DashboardProvider');
   }
   return context;
-}
+};
