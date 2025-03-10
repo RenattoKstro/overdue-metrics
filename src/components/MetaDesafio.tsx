@@ -8,9 +8,10 @@ import { Progress } from '@/components/ui/progress';
 const MetaDesafio = () => {
   const { data, formatCurrency } = useDashboard();
 
-  // Verificação de dados para evitar erros
-  const progressoDesafio = data?.progressoDesafio || 0; // Valor padrão se indefinido
-  const recebidoDesafioMes = data?.recebidoDesafioMes || 0;
+  // Calcular progresso com base nos dados de Ajustes de Metas
+  const progressoDesafio = data.metaDesafio
+    ? (data.recebidoDesafioMes / data.metaDesafio) * 100
+    : 0;
 
   return (
     <div className="animate-slide-up">
@@ -22,46 +23,20 @@ const MetaDesafio = () => {
           </div>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
             <div>
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 text-slate-700">Progresso do Desafio</h3>
-                <div className="flex items-center space-x-4">
-                  <div className="w-full">
-                    <Progress value={progressoDesafio} className="h-4 bg-blue-100" />
-                  </div>
+              <h3 className="text-lg font-semibold mb-2 text-slate-700">Progresso do Desafio</h3>
+              <div className="flex items-center space-x-4">
+                <div className="w-full">
+                  <Progress value={progressoDesafio} className="h-4 bg-blue-100" />
+                </div>
+                <Badge variant="outline" className="font-semibold text-lg">
+                  {progressoDesafio.toFixed(1)}%
+                </Badge>
+                <div className="flex items-center">
+                  <DollarSign className="h-4 w-4 text-blue-500 mr-2" />
                   <Badge variant="outline" className="font-semibold text-lg">
-                    {progressoDesafio.toFixed(1)}%
-                  </Badge>
-                  <div className="flex items-center">
-                    <DollarSign className="h-4 w-4 text-blue-500 mr-2" />
-                    <Badge variant="outline" className="font-semibold text-lg">
-                      {formatCurrency(recebidoDesafioMes)}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <DollarSign className="h-4 w-4 text-blue-500 mr-2" />
-                    <span className="text-sm font-medium text-slate-700">A Receber</span>
-                  </div>
-                  <Badge variant="outline" className="font-semibold">
-                    {formatCurrency(data.aReceberDesafio || 0)}
-                  </Badge>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <DollarSign className="h-4 w-4 text-blue-500 mr-2" />
-                    <span className="text-sm font-medium text-slate-700">Falta Receber</span>
-                  </div>
-                  <Badge variant="outline" className="font-semibold">
-                    {formatCurrency(data.faltaReceberDesafioMes || 0)}
+                    {formatCurrency(data.recebidoDesafioMes || 0)}
                   </Badge>
                 </div>
               </div>
