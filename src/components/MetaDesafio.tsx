@@ -8,8 +8,8 @@ import { Progress } from '@/components/ui/progress';
 const MetaDesafio = () => {
   const { data, formatCurrency } = useDashboard();
 
-  // Calcular progresso com base nos dados de Ajustes de Metas
-  const progressoDesafio = data.metaDesafio
+  // Calcular progresso com proteção contra divisão por zero
+  const progressoDesafio = data.metaDesafio && data.metaDesafio > 0
     ? (data.recebidoDesafioMes / data.metaDesafio) * 100
     : 0;
 
