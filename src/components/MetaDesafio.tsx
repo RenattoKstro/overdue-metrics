@@ -32,19 +32,10 @@ const MetaDesafio = () => {
   // Cálculo do progresso atual
   const progressValue = data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
 
-  // Valores alvo ajustados para corresponder aos "Falta receber" esperados
-  const meta96 = 733.915,55 - 257.576,83;  // 476.338,72
-  const meta98 = 733.915,55 - 272.255,14;  // 461.660,41
-  const meta100 = data.metaDesafio;        // 446.982,10
+  // Cálculo do "Falta receber" para 100%
+  const valorFaltante100 = Math.max(data.vencidoAtual - data.metaDesafio, 0);
 
-  // Cálculo do "Falta receber" para cada percentual
-  const valorFaltante96 = Math.max(data.vencidoAtual - meta96, 0);
-  const valorFaltante98 = Math.max(data.vencidoAtual - meta98, 0);
-  const valorFaltante100 = Math.max(data.vencidoAtual - meta100, 0);
-
-  // Cálculo do progresso para as barras (baseado no progresso geral)
-  const progress96 = data.vencidoAtual > 0 ? Math.min((data.metaDesafio / data.vencidoAtual) * 100, 96) : 0;
-  const progress98 = data.vencidoAtual > 0 ? Math.min((data.metaDesafio / data.vencidoAtual) * 100, 98) : 0;
+  // Cálculo do progresso para a barra de 100%
   const progress100 = data.vencidoAtual > 0 ? Math.min((data.metaDesafio / data.vencidoAtual) * 100, 100) : 0;
 
   return (
@@ -89,52 +80,10 @@ const MetaDesafio = () => {
             <div className="space-y-8">
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-yellow-600 flex items-center">
-                    <Trophy className="h-4 w-4 mr-1 text-yellow-500" /> 96%
-                  </span>
-                  <span className="text-sm text-slate-600">Meta: {formatCurrency(meta96)}</span>
-                </div>
-                <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-yellow-500 transition-all duration-1000"
-                    style={{ width: `${progress96}%` }}
-                  ></div>
-                </div>
-                <div className="mt-1 flex justify-between text-xs">
-                  <span className="text-slate-500">{progress96.toFixed(1)}%</span>
-                  <span className="text-red-500 font-medium">
-                    Falta receber: {formatCurrency(valorFaltante96)}
-                  </span>
-                </div>
-              </div>
-              
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-orange-600 flex items-center">
-                    <Trophy className="h-4 w-4 mr-1 text-orange-500" /> 98%
-                  </span>
-                  <span className="text-sm text-slate-600">Meta: {formatCurrency(meta98)}</span>
-                </div>
-                <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-orange-500 transition-all duration-1000"
-                    style={{ width: `${progress98}%` }}
-                  ></div>
-                </div>
-                <div className="mt-1 flex justify-between text-xs">
-                  <span className="text-slate-500">{progress98.toFixed(1)}%</span>
-                  <span className="text-red-500 font-medium">
-                    Falta receber: {formatCurrency(valorFaltante98)}
-                  </span>
-                </div>
-              </div>
-              
-              <div>
-                <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-green-600 flex items-center">
                     <Trophy className="h-4 w-4 mr-1 text-green-500" /> 100%
                   </span>
-                  <span className="text-sm text-slate-600">Meta: {formatCurrency(meta100)}</span>
+                  <span className="text-sm text-slate-600">Meta: {formatCurrency(data.metaDesafio)}</span>
                 </div>
                 <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
