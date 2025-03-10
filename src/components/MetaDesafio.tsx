@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useDashboard } from '@/context/DashboardContext';
 
 const MetaDesafio = () => {
-  const { data, updateData, calculateProgress, formatCurrency } = useDashboard();
+  const { data, updateData, formatCurrency } = useDashboard();
   const [inputValue, setInputValue] = useState(formatCurrency(data.metaDesafio));
   const [isEditing, setIsEditing] = useState(false);
 
@@ -29,14 +29,24 @@ const MetaDesafio = () => {
     e.target.select();
   };
 
-  const progressValue = data.progressoDesafio;
-  const recebidoDesafio = data.aberturaVencidoMes - data.vencidoAtual;
-  const valorFaltante96 = Math.max(data.vencidoAtual - (data.metaDesafio * 0.96), 0);
-  const valorFaltante98 = Math.max(data.vencidoAtual - (data.metaDesafio * 0.98), 0);
-  const valorFaltante100 = Math.max(data.vencidoAtual - data.metaDesafio, 0);
-  const progress96 = calculateProgress(data.vencidoAtual > 0 ? (data.metaDesafio * 0.96 / data.vencidoAtual) * 100 : 0);
-  const progress98 = calculateProgress(data.vencidoAtual > 0 ? (data.metaDesafio * 0.98 / data.vencidoAtual) * 100 : 0);
-  const progress100 = calculateProgress(data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0);
+  // Valores alvo para cada percentual (baseado nos dados fornecidos)
+  const metaDesafio = 446982.10; // Valor fixo para 100%
+  const target96 = 465606.00;   // Vencido Atual para 96%
+  const target98 = 456100.00;   // Vencido Atual para 98%
+  const target100 = 446982.10;  // Vencido Atual para 100%
+
+  // Cálculo do progresso atual
+  const currentProgress = data.vencidoAtual > 0 ? (data.vencidoAtual / metaDesafio) * 100 : 0;
+
+  // Cálculo do "Falta receber" para cada percentual
+  const falta96 = Math.max(data.vencidoAtual - target96, 0);
+  const falta98 = Math.max(data.vencidoAtual - target98, 0);
+  const falta100 = Math.max(data.vencidoAtual - target100, 0);
+
+  // Progresso das barras (inverter a lógica para refletir o percentual correto)
+  const progress96 = Math.min(Math.max(((target96 - data.vencidoAtual) / (target96 - target100)) * 100, 0), 100);
+  const progress98 = Math.min(Math.max(((target98 - data.vencidoAtual) / (target98 - target100)) * 100, 0), 100);
+  const progress100 = Math.min(Math.max(((target100 - data.vencidoAtual) / (target100 - target100)) * 100, 0), 100);
 
   return (
     <div className="animate-slide-up">
@@ -66,13 +76,14 @@ const MetaDesafio = () => {
               <div className="mb-6">
                 <Label className="block mb-2">Progresso</Label>
                 <div className="flex items-center space-x-2">
-                  <div className="text-2xl font-bold text-yellow-600">{progressValue.toFixed(2)}%</div>
-                  </div>
+                  <div className="text-2xl font-bold text-yellow-600">{currentProgress.toFixed(2)}%</div>
+                  <div className="text-sm text-slate-500">(Vencido Atual ÷ Meta Desafio)</div>
+                </div>
               </div>
 
               <div className="mb-6">
                 <Label className="block mb-2">Recebido</Label>
-                <div className="text-2xl font-bold text-green-600">{formatCurrency(recebidoDesafio)}</div>
+                <div className="text-2xl font-bold text-green-600">{formatCurrency(data.aberturaVencidoMes - data.vencidoAtual)}</div>
               </div>
             </div>
             
@@ -82,7 +93,7 @@ const MetaDesafio = () => {
                   <span className="font-medium text-yellow-600 flex items-center">
                     <Trophy className="h-4 w-4 mr-1 text-yellow-500" /> 96%
                   </span>
-                  <span className="text-sm text-slate-600">Meta: {formatCurrency(data.metaDesafio * 0.96)}</span>
+                  <span className="text-sm text-slate-600">Meta: {formatCurrency(target96)}</span>
                 </div>
                 <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
@@ -93,7 +104,7 @@ const MetaDesafio = () => {
                 <div className="mt-1 flex justify-between text-xs">
                   <span className="text-slate-500">{progress96.toFixed(1)}%</span>
                   <span className="text-red-500 font-medium">
-                    Falta receber: {formatCurrency(valorFaltante96)}
+                    Falta receber: {formatCurrency(falta96)}
                   </span>
                 </div>
               </div>
@@ -103,7 +114,7 @@ const MetaDesafio = () => {
                   <span className="font-medium text-orange-600 flex items-center">
                     <Trophy className="h-4 w-4 mr-1 text-orange-500" /> 98%
                   </span>
-                  <span className="text-sm text-slate-600">Meta: {formatCurrency(data.metaDesafio * 0.98)}</span>
+                  <span className="text-sm text-slate-600">Meta: {formatCurrency(target98)}</span>
                 </div>
                 <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
@@ -114,7 +125,7 @@ const MetaDesafio = () => {
                 <div className="mt-1 flex justify-between text-xs">
                   <span className="text-slate-500">{progress98.toFixed(1)}%</span>
                   <span className="text-red-500 font-medium">
-                    Falta receber: {formatCurrency(valorFaltante98)}
+                    Falta receber: {formatCurrency(falta98)}
                   </span>
                 </div>
               </div>
@@ -124,7 +135,7 @@ const MetaDesafio = () => {
                   <span className="font-medium text-green-600 flex items-center">
                     <Trophy className="h-4 w-4 mr-1 text-green-500" /> 100%
                   </span>
-                  <span className="text-sm text-slate-600">Meta: {formatCurrency(data.metaDesafio)}</span>
+                  <span className="text-sm text-slate-600">Meta: {formatCurrency(target100)}</span>
                 </div>
                 <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
@@ -135,7 +146,7 @@ const MetaDesafio = () => {
                 <div className="mt-1 flex justify-between text-xs">
                   <span className="text-slate-500">{progress100.toFixed(1)}%</span>
                   <span className="text-red-500 font-medium">
-                    Falta receber: {formatCurrency(valorFaltante100)}
+                    Falta receber: {formatCurrency(falta100)}
                   </span>
                 </div>
               </div>
