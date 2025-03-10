@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, DollarSign } from 'lucide-react';
+import { Trophy, DollarSign } from 'lucide-react'; // Garantindo importação correta
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDashboard } from '@/context/DashboardContext';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +18,7 @@ const MetaDesafio = () => {
       <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300 bg-gradient-to-br from-slate-50 to-slate-100">
         <CardHeader className="bg-gradient-to-r from-blue-400 to-blue-500 text-white">
           <div className="flex items-center space-x-2">
-            <Trophy className="h-6 w-6 text-blue-100 animate-float" />
+            {Trophy ? <Trophy className="h-6 w-6 text-blue-100 animate-float" /> : null}
             <CardTitle>Meta Desafio</CardTitle>
           </div>
         </CardHeader>
