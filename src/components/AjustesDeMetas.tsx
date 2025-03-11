@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar as CalendarIcon, Target, DollarSign, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +14,7 @@ const AjustesDeMetas = () => {
     aberturaVencidoDia: formatCurrency(data.aberturaVencidoDia),
     metaMes: formatCurrency(data.metaMes),
     vencidoAtual: formatCurrency(data.vencidoAtual),
-    diasRestantes: data.diasRestantes.toString(), // Usando diasRestantes
+    diasRestantes: data.diasRestantes.toString(),
     aReceberDesafio: formatCurrency(data.aReceberDesafio || 0),
     metaDesafio: formatCurrency(data.metaDesafio || 0),
   });
@@ -35,11 +34,26 @@ const AjustesDeMetas = () => {
   };
 
   const handleBlur = (field: keyof typeof inputs) => {
+    type FieldMapping = {
+      [K in keyof typeof inputs]: keyof typeof data;
+    };
+    
+    const fieldMapping: FieldMapping = {
+      aberturaVencidoMes: 'aberturaVencidoMes',
+      aberturaVencidoDia: 'aberturaVencidoDia',
+      metaMes: 'metaMes',
+      vencidoAtual: 'vencidoAtual',
+      diasRestantes: 'diasRestantes',
+      aReceberDesafio: 'aReceberDesafio',
+      metaDesafio: 'metaDesafio',
+    };
+    
+    const dashboardField = fieldMapping[field];
     const numericValue = field === 'diasRestantes'
       ? parseInt(inputs[field], 10) || 0
       : parseFloat(inputs[field].replace(',', '.')) || 0;
 
-    updateData(field as keyof DashboardData, numericValue);
+    updateData(dashboardField, numericValue);
 
     setInputs(prev => ({
       ...prev,
@@ -50,8 +64,10 @@ const AjustesDeMetas = () => {
 
   const handleFocus = (field: keyof typeof inputs, e: React.FocusEvent<HTMLInputElement>) => {
     setIsEditing(prev => ({ ...prev, [field]: true }));
-    const rawValue = (data[field as keyof DashboardData] as number).toString().replace('.', ',');
-    setInputs(prev => ({ ...prev, [field]: rawValue }));
+    const value = field === 'diasRestantes' 
+      ? data[field as keyof typeof data].toString() 
+      : (data[field as keyof typeof data] as number).toString().replace('.', ',');
+    setInputs(prev => ({ ...prev, [field]: value }));
     e.target.select();
   };
 
@@ -79,7 +95,6 @@ const AjustesDeMetas = () => {
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-8">
-            {/* Campos Editáveis */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div>
                 <Label htmlFor="aberturaVencidoMes" className="block mb-2 text-sm font-medium text-slate-700">Abertura Vencido Mês</Label>
@@ -188,7 +203,6 @@ const AjustesDeMetas = () => {
               </div>
             </div>
 
-            {/* Botão do Calendário */}
             <div>
               {!isCalendarExpanded ? (
                 <Button

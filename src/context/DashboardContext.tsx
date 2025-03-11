@@ -24,13 +24,23 @@ interface DashboardData {
   faltaReceberDesafioMes: number;
   progressoDesafio: number;
   metaDesafio: number;
+  // Added missing properties
+  currentDate: Date;
+  metaValeAlimentacao: number;
+  diasUteisRestantesAteCorte: number;
+  metaBatida: boolean | null;
 }
 
 interface DashboardContextType {
   data: DashboardData;
-  updateData: (key: keyof DashboardData, value: number | Date | boolean) => void;
+  updateData: (key: keyof DashboardData, value: number | Date | boolean | null) => void;
   toggleWorkDay: (date: Date) => void;
   formatCurrency: (value: number) => string;
+  // Added missing properties for MeusPremios
+  premiosMetaFiado: number;
+  premiosMetaDesafio: number;
+  premiosValeAlimentacao: number;
+  totalPremios: number;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -54,15 +64,59 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     faltaReceberDesafioMes: 2000,
     progressoDesafio: 60,
     metaDesafio: 5000,
+    // Added initial values for new properties
+    currentDate: new Date(),
+    metaValeAlimentacao: 1600, // 80% of aReceber by default
+    diasUteisRestantesAteCorte: 10,
+    metaBatida: null,
   });
 
-  const updateData = (key: keyof DashboardData, value: number | Date | boolean) => {
+  // Calculate premium values
+  const calcularPercentualMetaFiado = () => {
+    if (data.metaMes <= 0) return 0;
+    return (data.recebidoMes / data.metaMes) * 100;
+  };
+
+  const calcularPercentualMetaDesafio = () => {
+    if (data.vencidoAtual <= 0) return 0;
+    return (data.metaDesafio / data.vencidoAtual) * 100;
+  };
+
+  const percentMetaFiado = calcularPercentualMetaFiado();
+  const percentMetaDesafio = calcularPercentualMetaDesafio();
+
+  // Calculate premiums
+  const premiosMetaFiado = 
+    (percentMetaFiado >= 94 ? 52.50 : 0) +
+    (percentMetaFiado >= 96 ? 63.00 : 0) +
+    (percentMetaFiado >= 98 ? 84.00 : 0) +
+    (percentMetaFiado >= 99 ? 94.50 : 0) +
+    (percentMetaFiado >= 100 ? 241.50 : 0) +
+    (percentMetaFiado >= 101 ? 84.00 : 0) +
+    (percentMetaFiado >= 103 ? 84.00 : 0) +
+    (percentMetaFiado >= 105 ? 84.00 : 0);
+
+  const premiosMetaDesafio = 
+    (percentMetaDesafio >= 96 ? 200.00 : 0) +
+    (percentMetaDesafio >= 98 ? 150.00 : 0) +
+    (percentMetaDesafio >= 100 ? 150.00 : 0);
+
+  const premiosValeAlimentacao = data.metaBatida === true ? 100.00 : 0;
+  
+  const totalPremios = premiosMetaFiado + premiosMetaDesafio + premiosValeAlimentacao;
+
+  const updateData = (key: keyof DashboardData, value: number | Date | boolean | null) => {
     setData(prev => {
       const newData = { ...prev };
       
       // Handle specific key updates
       if (typeof value === 'number') {
         (newData[key] as number) = value;
+      } else if (value instanceof Date) {
+        (newData[key] as Date) = value;
+      } else {
+        // Handle boolean or null values
+        (newData[key] as boolean | null) = value;
       }
       
       // Recalcular valores derivados
@@ -75,6 +129,9 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       newData.progressoDesafio = newData.metaDesafio && newData.metaDesafio > 0
         ? ((newData.recebidoDesafioMes || 0) / newData.metaDesafio) * 100
         : 0;
+        
+      // Update for Vale Alimentação meta
+      newData.metaValeAlimentacao = newData.aReceber * 0.8; // 80% of aReceber
 
       return newData;
     });
@@ -112,7 +169,16 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   return (
-    <DashboardContext.Provider value={{ data, updateData, toggleWorkDay, formatCurrency }}>
+    <DashboardContext.Provider value={{ 
+      data, 
+      updateData, 
+      toggleWorkDay, 
+      formatCurrency,
+      premiosMetaFiado,
+      premiosMetaDesafio,
+      premiosValeAlimentacao,
+      totalPremios
+    }}>
       {children}
     </DashboardContext.Provider>
   );

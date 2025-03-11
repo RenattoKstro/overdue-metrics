@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Gift, Wallet, Trophy, Utensils } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
