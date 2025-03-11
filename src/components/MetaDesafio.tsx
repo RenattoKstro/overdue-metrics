@@ -9,15 +9,11 @@ import { useDashboard } from '@/context/DashboardContext';
 const MetaDesafio = () => {
   const { data, updateData, calculateProgress, formatCurrency } = useDashboard();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get raw input value
-    const rawValue = e.target.value;
+  const handleInputChange = (value: string) => {
+    // Remove qualquer caractere que não seja número, vírgula ou ponto
+    const numericValue = value.replace(/[^\d,.]/g, '')
+                              .replace(',', '.'); // Substitui vírgula por ponto
     
-    // Remove currency symbols and formatting
-    const numericValue = rawValue.replace(/[^0-9,.]/g, '')
-                              .replace(',', '.'); // Replace comma with dot
-    
-    // Convert to number if valid
     const floatValue = parseFloat(numericValue);
     
     if (!isNaN(floatValue)) {
@@ -35,9 +31,9 @@ const MetaDesafio = () => {
   const valorFaltante100 = Math.max(data.vencidoAtual - data.metaDesafio, 0);
   
   // Calcular progresso para cada meta
-  const progress96 = calculateProgress(data.vencidoAtual > 0 ? (data.metaDesafio * 0.96 / data.vencidoAtual) * 100 : 0);
-  const progress98 = calculateProgress(data.vencidoAtual > 0 ? (data.metaDesafio * 0.98 / data.vencidoAtual) * 100 : 0);
-  const progress100 = calculateProgress(data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0);
+  const progress96 = calculateProgress((data.metaDesafio * 0.96 / data.vencidoAtual) * 100);
+  const progress98 = calculateProgress((data.metaDesafio * 0.98 / data.vencidoAtual) * 100);
+  const progress100 = calculateProgress((data.metaDesafio / data.vencidoAtual) * 100);
 
   return (
     <div className="animate-slide-up">
@@ -56,8 +52,9 @@ const MetaDesafio = () => {
                 <Target className="h-5 w-5 text-yellow-500" />
                 <Input
                   id="metaDesafio"
+                  type="text"
                   value={formatCurrency(data.metaDesafio)}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange(e.target.value)}
                   className="font-semibold text-xl"
                   onFocus={(e) => e.target.select()}
                 />

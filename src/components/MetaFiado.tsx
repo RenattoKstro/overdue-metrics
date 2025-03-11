@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Wallet, Calendar, Sunrise, Target, AlertTriangle, ArrowDown, CheckCircle, Building, BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,15 +26,11 @@ const MetaFiado = () => {
     progressColor = "bg-orange-500";
   }
 
-  const handleInputChange = (field: keyof typeof data, e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get raw input value
-    const rawValue = e.target.value;
+  const handleInputChange = (field: keyof typeof data, value: string) => {
+    // Remove qualquer caractere que não seja número, vírgula ou ponto
+    const numericValue = value.replace(/[^\d,.]/g, '')
+                              .replace(',', '.'); // Substitui vírgula por ponto
     
-    // Remove currency symbols and formatting
-    const numericValue = rawValue.replace(/[^0-9,.]/g, '')
-                              .replace(',', '.'); // Replace comma with dot
-    
-    // Convert to number if valid
     const floatValue = parseFloat(numericValue);
     
     if (!isNaN(floatValue)) {
@@ -85,8 +82,9 @@ const MetaFiado = () => {
             <Label htmlFor="aberturaVencidoMes">Valor</Label>
             <Input
               id="aberturaVencidoMes"
+              type="text"
               value={formatCurrency(data.aberturaVencidoMes)}
-              onChange={(e) => handleInputChange('aberturaVencidoMes', e)}
+              onChange={(e) => handleInputChange('aberturaVencidoMes', e.target.value)}
               className="font-semibold text-xl mt-1"
               onFocus={(e) => e.target.select()}
             />
@@ -104,10 +102,10 @@ const MetaFiado = () => {
             <Label htmlFor="aberturaVencidoDia">Valor</Label>
             <Input
               id="aberturaVencidoDia"
+              type="text"
               value={formatCurrency(data.aberturaVencidoDia)}
-              onChange={(e) => handleInputChange('aberturaVencidoDia', e)}
+              onChange={(e) => handleInputChange('aberturaVencidoDia', e.target.value)}
               className="font-semibold text-xl mt-1"
-              onFocus={(e) => e.target.select()}
             />
           </CardContent>
         </Card>
@@ -123,10 +121,10 @@ const MetaFiado = () => {
             <Label htmlFor="metaMes">Valor</Label>
             <Input
               id="metaMes"
+              type="text"
               value={formatCurrency(data.metaMes)}
-              onChange={(e) => handleInputChange('metaMes', e)}
+              onChange={(e) => handleInputChange('metaMes', e.target.value)}
               className="font-semibold text-xl mt-1"
-              onFocus={(e) => e.target.select()}
             />
           </CardContent>
         </Card>
@@ -142,10 +140,10 @@ const MetaFiado = () => {
             <Label htmlFor="vencidoAtual">Valor</Label>
             <Input
               id="vencidoAtual"
+              type="text"
               value={formatCurrency(data.vencidoAtual)}
-              onChange={(e) => handleInputChange('vencidoAtual', e)}
+              onChange={(e) => handleInputChange('vencidoAtual', e.target.value)}
               className="font-semibold text-xl mt-1"
-              onFocus={(e) => e.target.select()}
             />
           </CardContent>
         </Card>
