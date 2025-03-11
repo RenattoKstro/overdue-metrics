@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,10 +6,11 @@ import { LucideIcon } from 'lucide-react';
 interface MetaInputProps {
   id: string;
   label: string;
-  value: string | number;
+  value: number; // Alterado para number apenas
   icon: LucideIcon;
   isNumeric?: boolean;
   onUpdate: (value: number) => void;
+  formatValue?: (value: number) => string; // Função opcional para formatação
 }
 
 const MetaInput: React.FC<MetaInputProps> = ({
@@ -20,6 +20,7 @@ const MetaInput: React.FC<MetaInputProps> = ({
   icon: Icon,
   isNumeric = true,
   onUpdate,
+  formatValue = (val) => val.toString(), // Padrão sem formatação
 }) => {
   const [inputValue, setInputValue] = useState<string>(value.toString());
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -33,8 +34,8 @@ const MetaInput: React.FC<MetaInputProps> = ({
     const numericValue = isNumeric
       ? parseFloat(inputValue.replace(',', '.')) || 0
       : parseInt(inputValue, 10) || 0;
-    
     onUpdate(numericValue);
+    setInputValue(numericValue.toString()); // Volta ao valor bruto
     setIsEditing(false);
   };
 
@@ -43,6 +44,8 @@ const MetaInput: React.FC<MetaInputProps> = ({
     e.target.select();
   };
 
+  const displayValue = isEditing ? inputValue : formatValue(value);
+
   return (
     <div>
       <Label htmlFor={id} className="block mb-2 text-sm font-medium text-slate-700">{label}</Label>
@@ -50,7 +53,7 @@ const MetaInput: React.FC<MetaInputProps> = ({
         <Icon className="h-4 w-4 text-blue-500" />
         <Input
           id={id}
-          value={inputValue}
+          value={displayValue}
           onChange={handleInputChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
