@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Target } from 'lucide-react';
@@ -20,9 +19,9 @@ const AjustesDeMetas = () => {
         <CardContent className="p-6">
           <div className="space-y-8">
             <MetaInputGrid />
-            <WorkdayCalendar 
-              isExpanded={isCalendarExpanded} 
-              onToggleExpand={() => setIsCalendarExpanded(!isCalendarExpanded)} 
+            <WorkdayCalendar
+              isExpanded={isCalendarExpanded}
+              onToggleExpand={() => setIsCalendarExpanded(!isCalendarExpanded)}
             />
           </div>
         </CardContent>
