@@ -6,16 +6,8 @@ import { useDashboard } from '@/context/DashboardContext';
 const MeusPremios = () => {
   const { data, formatCurrency, premiosMetaFiado, premiosMetaDesafio, premiosValeAlimentacao, totalPremios } = useDashboard();
 
-  // Calcular os percentuais reais com base nos dados atuais
-  const calcularPercentualMetaFiado = () => {
-    if (data.metaMes <= 0) return 0;
-    return (data.recebidoMes / data.metaMes) * 100;
-  };
-
-  const calcularPercentualMetaDesafio = () => {
-    if (data.vencidoAtual <= 0) return 0;
-    return (data.metaDesafio / data.vencidoAtual) * 100;
-  };
+  const calcularPercentualMetaFiado = () => data.metaMes > 0 ? (data.recebidoMes / data.metaMes) * 100 : 0;
+  const calcularPercentualMetaDesafio = () => data.vencidoAtual > 0 ? (data.metaDesafio / data.vencidoAtual) * 100 : 0;
 
   const percentMetaFiado = calcularPercentualMetaFiado();
   const percentMetaDesafio = calcularPercentualMetaDesafio();
@@ -23,7 +15,6 @@ const MeusPremios = () => {
 
   const renderPremioStatus = (threshold: number, currentValue: number, reward: number, icon: JSX.Element) => {
     const isAchieved = currentValue >= threshold;
-    
     return (
       <div className={`flex justify-between items-center p-3 rounded-lg mb-2 transition-all duration-300 ${
         isAchieved ? 'bg-green-50 border border-green-200' : 'bg-slate-50 border border-slate-200'
@@ -59,7 +50,6 @@ const MeusPremios = () => {
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Meta Fiado */}
             <Card className="shadow-card hover:shadow-card-hover transition-all duration-300 hover-lift border-none bg-white">
               <CardHeader className="bg-gradient-to-r from-blue-400/90 to-blue-500/90 text-white py-4">
                 <div className="flex items-center space-x-2">
@@ -84,8 +74,6 @@ const MeusPremios = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Meta Desafio */}
             <Card className="shadow-card hover:shadow-card-hover transition-all duration-300 hover-lift border-none bg-white">
               <CardHeader className="bg-gradient-to-r from-yellow-400/90 to-yellow-500/90 text-white py-4">
                 <div className="flex items-center space-x-2">
@@ -105,8 +93,6 @@ const MeusPremios = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Meta Vale Alimentação */}
             <Card className="shadow-card hover:shadow-card-hover transition-all duration-300 hover-lift border-none bg-white">
               <CardHeader className="bg-gradient-to-r from-emerald-400/90 to-emerald-500/90 text-white py-4">
                 <div className="flex items-center space-x-2">
@@ -144,8 +130,6 @@ const MeusPremios = () => {
               </CardContent>
             </Card>
           </div>
-
-          {/* Total Geral */}
           <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-100">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
