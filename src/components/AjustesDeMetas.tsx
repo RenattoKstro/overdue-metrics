@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Target, DollarSign } from 'lucide-react';
+import { Calendar as CalendarIcon, Target, DollarSign, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -221,7 +222,12 @@ const AjustesDeMetas = () => {
                       const date = new Date(currentYear, currentMonth, day);
                       const isToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth();
                       const workDay = data.workDays.find(
-                        wd => wd.date.getDate() === day && wd.date.getMonth() === currentMonth
+                        wd => {
+                          if (wd.date instanceof Date) {
+                            return wd.date.getDate() === day && wd.date.getMonth() === currentMonth;
+                          }
+                          return false;
+                        }
                       );
                       const isWorkDay = workDay ? workDay.isWorkDay : true;
 

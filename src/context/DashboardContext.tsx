@@ -1,4 +1,10 @@
+
 import React, { createContext, useContext, useState } from 'react';
+
+interface WorkDay {
+  date: Date;
+  isWorkDay: boolean;
+}
 
 interface DashboardData {
   metaMes: number;
@@ -12,7 +18,7 @@ interface DashboardData {
   faltaReceberMes: number;
   diasRestantes: number;
   recebimentoPorDia: number;
-  workDays: { date: Date; isWorkDay: boolean }[];
+  workDays: WorkDay[];
   aReceberDesafio: number;
   recebidoDesafioMes: number;
   faltaReceberDesafioMes: number;
@@ -52,7 +58,13 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const updateData = (key: keyof DashboardData, value: number | Date | boolean) => {
     setData(prev => {
-      const newData = { ...prev, [key]: value };
+      const newData = { ...prev };
+      
+      // Handle specific key updates
+      if (typeof value === 'number') {
+        (newData[key] as number) = value;
+      }
+      
       // Recalcular valores derivados
       newData.faltaReceberMes = newData.aReceber - newData.recebidoMes;
       newData.diasRestantes = newData.diaCorte; // Sincronizar diasRestantes com diaCorte
@@ -70,17 +82,21 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const toggleWorkDay = (date: Date) => {
     setData(prev => {
-      const existingDay = prev.workDays.find(wd => wd.date.toDateString() === date.toDateString());
+      const existingDay = prev.workDays.find(wd => 
+        wd.date instanceof Date && wd.date.toDateString() === date.toDateString()
+      );
+      
       if (existingDay) {
         return {
           ...prev,
           workDays: prev.workDays.map(wd =>
-            wd.date.toDateString() === date.toDateString()
+            wd.date instanceof Date && wd.date.toDateString() === date.toDateString()
               ? { ...wd, isWorkDay: !wd.isWorkDay }
               : wd
           ),
         };
       }
+      
       return {
         ...prev,
         workDays: [...prev.workDays, { date, isWorkDay: true }],
