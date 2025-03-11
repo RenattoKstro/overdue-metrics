@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
@@ -57,16 +56,17 @@ const WorkdayCalendar: React.FC<WorkdayCalendarProps> = ({ isExpanded, onToggleE
         {paddingDays.map((_, index) => (
           <div key={`padding-${index}`} />
         ))}
-        {daysArray.map(day => {
+        {daysArray.map((day) => {
           const date = new Date(currentYear, currentMonth, day);
-          const isToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth();
-          const workDay = data.workDays.find(
-            wd => {
-              if (wd.date instanceof Date) {
-                return wd.date.getDate() === day && wd.date.getMonth() === currentMonth;
-              }
-              return false;
-            }
+          const isToday =
+            date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear();
+          const workDay = data.workDays.find((wd) =>
+            wd.date instanceof Date &&
+            wd.date.getDate() === day &&
+            wd.date.getMonth() === currentMonth &&
+            wd.date.getFullYear() === currentYear
           );
           const isWorkDay = workDay ? workDay.isWorkDay : true;
 
