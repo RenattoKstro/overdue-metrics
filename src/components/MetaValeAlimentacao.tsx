@@ -6,48 +6,47 @@ import { Badge } from '@/components/ui/badge';
 
 const MetaValeAlimentacao = () => {
   const { data, updateData, formatCurrency } = useDashboard();
-
+  
   const valorJaRecebido = data.aberturaVencidoMes - data.vencidoAtual;
-  const percentageReached = data.metaValeAlimentacao > 0
+  const percentageReached = data.metaValeAlimentacao !== 0 
     ? (valorJaRecebido / data.metaValeAlimentacao) * 100
     : 0;
+    
   const progressValue = Math.min(Math.max(percentageReached, 0), 100);
-
+  
   const valorNecessario = data.metaValeAlimentacao;
   const valorFaltante = Math.max(valorNecessario - valorJaRecebido, 0);
-  const recebimentoDiarioNecessario = data.diasUteisRestantesAteCorte > 0
-    ? valorFaltante / data.diasUteisRestantesAteCorte
+  const recebimentoDiarioNecessario = data.diasUteisRestantesAteCorte > 0 
+    ? valorFaltante / data.diasUteisRestantesAteCorte 
     : 0;
-
+  
   useEffect(() => {
     const today = new Date();
     const currentDay = today.getDate();
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
     const cutoffDate = new Date(currentYear, currentMonth, data.diaCorte);
-
+    
     if (today > cutoffDate && data.metaBatida === null) {
-      const percentageAchieved = data.metaValeAlimentacao > 0
-        ? (valorJaRecebido / data.metaValeAlimentacao) * 100
-        : 0;
+      const percentageAchieved = valorJaRecebido / data.metaValeAlimentacao * 100;
       updateData('metaBatida', percentageAchieved >= 80);
-    } else if (today <= cutoffDate) {
-      const percentageAchieved = data.metaValeAlimentacao > 0
-        ? (valorJaRecebido / data.metaValeAlimentacao) * 100
-        : 0;
+    }
+    
+    if (today <= cutoffDate) {
+      const percentageAchieved = valorJaRecebido / data.metaValeAlimentacao * 100;
       if (percentageAchieved >= 80) {
         updateData('metaBatida', true);
       } else {
         updateData('metaBatida', null);
       }
     }
-  }, [data.vencidoAtual, data.aberturaVencidoMes, data.metaValeAlimentacao, data.diaCorte, updateData]);
+  }, [data.vencidoAtual, data.aberturaVencidoMes, data.metaValeAlimentacao]);
 
   let progressColor = "bg-red-500";
   if (progressValue >= 80) progressColor = "bg-green-500";
   else if (progressValue >= 50) progressColor = "bg-yellow-500";
   else if (progressValue >= 30) progressColor = "bg-orange-500";
-
+  
   return (
     <div className="animate-slide-up">
       <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300 bg-gradient-to-br from-slate-50 to-slate-100">
@@ -68,6 +67,7 @@ const MetaValeAlimentacao = () => {
                   Se atingir 80% ({formatCurrency(data.metaValeAlimentacao)}) até o dia 15, a meta é batida.
                 </p>
               </div>
+              
               {data.metaBatida === true ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center">
                   <Badge variant="outline" className="mr-2 bg-green-500 text-white">Meta Batida</Badge>
@@ -86,17 +86,20 @@ const MetaValeAlimentacao = () => {
                 </div>
               )}
             </div>
+            
             <div className="space-y-6">
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-medium text-emerald-600 flex items-center">
                     <Utensils className="h-4 w-4 mr-1" /> Progresso Atual
                   </span>
-                  <span>{progressValue.toFixed(2)}%</span>
+                  <span>
+                    {progressValue.toFixed(2)}%
+                  </span>
                 </div>
                 <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${progressColor} transition-all duration-1000 ease-out`}
+                  <div 
+                    className={`h-full ${progressColor} transition-all duration-1000 ease-out`} 
                     style={{ width: `${progressValue}%` }}
                   ></div>
                 </div>
@@ -106,6 +109,7 @@ const MetaValeAlimentacao = () => {
                   <span>100%</span>
                 </div>
               </div>
+              
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
@@ -116,6 +120,7 @@ const MetaValeAlimentacao = () => {
                     {data.diasUteisRestantesAteCorte}
                   </Badge>
                 </div>
+                
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <BarChart className="h-4 w-4 text-indigo-500 mr-2" />
@@ -125,6 +130,7 @@ const MetaValeAlimentacao = () => {
                     {formatCurrency(recebimentoDiarioNecessario)}
                   </Badge>
                 </div>
+                
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <Utensils className="h-4 w-4 text-emerald-500 mr-2" />
@@ -134,6 +140,7 @@ const MetaValeAlimentacao = () => {
                     {formatCurrency(data.metaValeAlimentacao)}
                   </Badge>
                 </div>
+                
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <Utensils className="h-4 w-4 text-emerald-500 mr-2" />

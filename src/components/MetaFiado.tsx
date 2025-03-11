@@ -8,15 +8,40 @@ import { Progress } from '@/components/ui/progress';
 const MetaFiado = () => {
   const { data, formatCurrency } = useDashboard();
 
-  const progresso = data.metaMes > 0 ? (data.recebidoMes / data.metaMes) * 100 : 0;
+  // Calcular progresso com base no "Recebido Mês" e "Meta Mês"
+  const progresso = (data.recebidoMes / data.metaMes) * 100;
 
   const valueCards = [
-    { icon: DollarSign, label: 'A Receber', value: formatCurrency(data.aReceber) },
-    { icon: DollarSign, label: 'Falta Receber Mês', value: formatCurrency(data.faltaReceberMes) },
-    { icon: DollarSign, label: 'Recebido Mês', value: formatCurrency(data.recebidoMes) },
-    { icon: DollarSign, label: 'Recebido Hoje', value: formatCurrency(data.recebidoHoje) },
-    { icon: Calendar, label: 'Dias Restantes', value: data.diasRestantes.toString() },
-    { icon: BarChart, label: 'Recebimento por Dia', value: formatCurrency(data.recebimentoPorDia) },
+    {
+      icon: DollarSign,
+      label: 'A Receber',
+      value: formatCurrency(data.aReceber),
+    },
+    {
+      icon: DollarSign,
+      label: 'Falta Receber Mês',
+      value: formatCurrency(data.faltaReceberMes),
+    },
+    {
+      icon: DollarSign,
+      label: 'Recebido Mês',
+      value: formatCurrency(data.recebidoMes),
+    },
+    {
+      icon: DollarSign,
+      label: 'Recebido Hoje',
+      value: formatCurrency(data.recebidoHoje),
+    },
+    {
+      icon: Calendar,
+      label: 'Dias Restantes',
+      value: data.diasRestantes.toString(),
+    },
+    {
+      icon: BarChart,
+      label: 'Recebimento por Dia',
+      value: formatCurrency(data.recebimentoPorDia),
+    },
   ];
 
   return (
@@ -42,7 +67,10 @@ const MetaFiado = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {valueCards.map((card, index) => (
-              <Card key={index} className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300 border border-slate-200">
+              <Card
+                key={index}
+                className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300 border border-slate-200"
+              >
                 <CardContent className="p-6 flex flex-col items-center justify-center h-40">
                   <card.icon className="h-8 w-8 text-blue-500 mb-4 animate-pulse" />
                   <h3 className="text-md font-medium text-slate-700 mb-2">{card.label}</h3>

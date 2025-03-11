@@ -1,54 +1,61 @@
+
 import React from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const WorkdayCalendarFull: React.FC = () => { // Renomeado para evitar duplicata
+const Calendar = () => {
   const { data, toggleWorkDay } = useDashboard();
   const currentMonth = data.currentDate.toLocaleString('pt-BR', { month: 'long' });
   const currentYear = data.currentDate.getFullYear();
 
+  // Get all days in the current month
   const daysInMonth = new Date(data.currentDate.getFullYear(), data.currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(data.currentDate.getFullYear(), data.currentDate.getMonth(), 1).getDay();
 
+  // Create calendar grid
   const calendarDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const paddingDays = Array.from({ length: firstDayOfMonth }, (_, i) => null);
   const calendarGrid = [...paddingDays, ...calendarDays];
 
+  // Function to check if a day is a work day
   const isWorkDay = (day: number) => {
     const date = new Date(data.currentDate.getFullYear(), data.currentDate.getMonth(), day);
-    const workDay = data.workDays.find(wd =>
-      wd.date.getDate() === date.getDate() &&
+    const workDay = data.workDays.find(wd => 
+      wd.date.getDate() === date.getDate() && 
       wd.date.getMonth() === date.getMonth()
     );
     return workDay?.isWorkDay ?? false;
   };
 
+  // Function to check if a day is today
   const isToday = (day: number) => {
     const today = new Date();
-    return (
-      today.getDate() === day &&
-      today.getMonth() === data.currentDate.getMonth() &&
-      today.getFullYear() === data.currentDate.getFullYear()
-    );
+    return today.getDate() === day &&
+           today.getMonth() === data.currentDate.getMonth() &&
+           today.getFullYear() === data.currentDate.getFullYear();
   };
 
-  const totalWorkDaysInMonth = data.workDays.filter(day =>
+  // Calculate total work days in month
+  const totalWorkDaysInMonth = data.workDays.filter(day => 
     day.date.getMonth() === data.currentDate.getMonth() && day.isWorkDay
   ).length;
 
+  // Calculate remaining work days
   const today = new Date();
-  const remainingWorkDays = data.workDays.filter(day =>
-    day.date > today &&
+  const remainingWorkDays = data.workDays.filter(day => 
+    day.date > today && 
     day.date.getMonth() === today.getMonth() &&
     day.isWorkDay
   ).length;
 
+  // Function to toggle work day
   const handleToggleWorkDay = (day: number) => {
     const date = new Date(data.currentDate.getFullYear(), data.currentDate.getMonth(), day);
     toggleWorkDay(date);
   };
 
+  // Days of the week (starting with Sunday)
   const daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
   return (
@@ -103,4 +110,4 @@ const WorkdayCalendarFull: React.FC = () => { // Renomeado para evitar duplicata
   );
 };
 
-export default WorkdayCalendarFull;
+export default Calendar;
