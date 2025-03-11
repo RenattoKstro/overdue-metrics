@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, DollarSign } from 'lucide-react'; // Garantindo importação correta
+import { Trophy, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDashboard } from '@/context/DashboardContext';
 import { Badge } from '@/components/ui/badge';
@@ -8,8 +8,8 @@ import { Progress } from '@/components/ui/progress';
 const MetaDesafio = () => {
   const { data, formatCurrency } = useDashboard();
 
-  // Calcular progresso com proteção contra divisão por zero
-  const progressoDesafio = data.metaDesafio && data.metaDesafio > 0
+  // Calcular progresso com base nos dados de Ajustes de Metas
+  const progressoDesafio = data.metaDesafio
     ? (data.recebidoDesafioMes / data.metaDesafio) * 100
     : 0;
 
@@ -18,7 +18,7 @@ const MetaDesafio = () => {
       <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300 bg-gradient-to-br from-slate-50 to-slate-100">
         <CardHeader className="bg-gradient-to-r from-blue-400 to-blue-500 text-white">
           <div className="flex items-center space-x-2">
-            {Trophy ? <Trophy className="h-6 w-6 text-blue-100 animate-float" /> : null}
+            <Trophy className="h-6 w-6 text-blue-100 animate-float" />
             <CardTitle>Meta Desafio</CardTitle>
           </div>
         </CardHeader>
