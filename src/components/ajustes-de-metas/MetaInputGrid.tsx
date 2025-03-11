@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DollarSign, Target, Trophy } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
@@ -16,58 +15,58 @@ const MetaInputGrid: React.FC = () => {
       <MetaInput
         id="aberturaVencidoMes"
         label="Abertura Vencido Mês"
-        value={formatCurrency(data.aberturaVencidoMes)}
+        value={data.aberturaVencidoMes}
         icon={DollarSign}
         onUpdate={(value) => handleUpdateValue('aberturaVencidoMes', value)}
+        formatValue={formatCurrency}
       />
-
       <MetaInput
         id="aberturaVencidoDia"
         label="Abertura Vencido Dia"
-        value={formatCurrency(data.aberturaVencidoDia)}
+        value={data.aberturaVencidoDia}
         icon={DollarSign}
         onUpdate={(value) => handleUpdateValue('aberturaVencidoDia', value)}
+        formatValue={formatCurrency}
       />
-
       <MetaInput
         id="metaMes"
         label="Meta Mês"
-        value={formatCurrency(data.metaMes)}
+        value={data.metaMes}
         icon={Target}
         onUpdate={(value) => handleUpdateValue('metaMes', value)}
+        formatValue={formatCurrency}
       />
-
       <MetaInput
         id="vencidoAtual"
         label="Vencido Atual"
-        value={formatCurrency(data.vencidoAtual)}
+        value={data.vencidoAtual}
         icon={DollarSign}
         onUpdate={(value) => handleUpdateValue('vencidoAtual', value)}
+        formatValue={formatCurrency}
       />
-
       <MetaInput
         id="diasRestantes"
         label="Dias Restantes"
-        value={data.diasRestantes.toString()}
+        value={data.diasRestantes}
         icon={DollarSign}
         isNumeric={false}
         onUpdate={(value) => handleUpdateValue('diasRestantes', value)}
       />
-
       <MetaInput
         id="aReceberDesafio"
         label="A Receber Desafio"
-        value={formatCurrency(data.aReceberDesafio || 0)}
+        value={data.aReceberDesafio ?? 0}
         icon={DollarSign}
         onUpdate={(value) => handleUpdateValue('aReceberDesafio', value)}
+        formatValue={formatCurrency}
       />
-
       <MetaInput
         id="metaDesafio"
         label="Meta Desafio"
-        value={formatCurrency(data.metaDesafio || 0)}
+        value={data.metaDesafio ?? 0}
         icon={Trophy}
         onUpdate={(value) => handleUpdateValue('metaDesafio', value)}
+        formatValue={formatCurrency}
       />
     </div>
   );
