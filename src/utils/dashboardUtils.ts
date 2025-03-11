@@ -1,23 +1,28 @@
 
 import { DashboardData } from '@/types/dashboard';
 
+// Calculation functions
 export const calculateDerivedValues = (data: DashboardData): Partial<DashboardData> => {
   const newData: Partial<DashboardData> = {};
   
+  // Base calculations
   newData.faltaReceberMes = data.aReceber - data.recebidoMes;
   newData.diasRestantes = data.diaCorte;
   newData.recebimentoPorDia = data.diasRestantes > 0 ? newData.faltaReceberMes! / data.diasRestantes : 0;
 
+  // Desafio-related calculations
   newData.faltaReceberDesafioMes = (data.aReceberDesafio || 0) - (data.recebidoDesafioMes || 0);
   newData.progressoDesafio = data.metaDesafio && data.metaDesafio > 0
     ? ((data.recebidoDesafioMes || 0) / data.metaDesafio) * 100
     : 0;
     
+  // Vale Alimentação calculation
   newData.metaValeAlimentacao = data.aReceber * 0.8; // 80% of aReceber
 
   return newData;
 };
 
+// Formatting functions
 export const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -25,6 +30,7 @@ export const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
+// Percentage calculation functions
 export const calcularPercentualMetaFiado = (data: DashboardData): number => {
   if (data.metaMes <= 0) return 0;
   return (data.recebidoMes / data.metaMes) * 100;
@@ -35,6 +41,7 @@ export const calcularPercentualMetaDesafio = (data: DashboardData): number => {
   return (data.metaDesafio / data.vencidoAtual) * 100;
 };
 
+// Premium calculation functions
 export const calculatePremiosMetaFiado = (percentMetaFiado: number): number => {
   return (percentMetaFiado >= 94 ? 52.50 : 0) +
     (percentMetaFiado >= 96 ? 63.00 : 0) +
@@ -52,6 +59,7 @@ export const calculatePremiosMetaDesafio = (percentMetaDesafio: number): number 
     (percentMetaDesafio >= 100 ? 150.00 : 0);
 };
 
+// Initial data function
 export const getInitialDashboardData = (): DashboardData => {
   return {
     metaMes: 10000,
