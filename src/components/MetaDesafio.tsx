@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 const MetaDesafio = () => {
   const { data, formatCurrency } = useDashboard();
 
-  const progressoDesafio = data.metaDesafio && data.metaDesafio > 0
+  const progressoDesafio = data.metaDesafio > 0
     ? (data.recebidoDesafioMes / data.metaDesafio) * 100
     : 0;
 
