@@ -14,9 +14,9 @@ const AjustesDeMetas = () => {
     aberturaVencidoDia: formatCurrency(data.aberturaVencidoDia),
     metaMes: formatCurrency(data.metaMes),
     vencidoAtual: formatCurrency(data.vencidoAtual),
-    diasRestantes: data.diaCorte.toString(), // Renomeado de diaCorte para diasRestantes
+    diasRestantes: data.diasRestantes.toString(), // Usando diasRestantes
     aReceberDesafio: formatCurrency(data.aReceberDesafio || 0),
-    metaDesafio: formatCurrency(data.metaDesafio || 0), // Novo campo para meta do desafio
+    metaDesafio: formatCurrency(data.metaDesafio || 0),
   });
   const [isEditing, setIsEditing] = useState({
     aberturaVencidoMes: false,
@@ -34,20 +34,22 @@ const AjustesDeMetas = () => {
   };
 
   const handleBlur = (field: keyof typeof inputs) => {
-    const numericValue = parseFloat(inputs[field].replace(',', '.')) || 0;
-    updateData(
-      field === 'diasRestantes' ? 'diaCorte' : field, // Mapeia diasRestantes para diaCorte
-      field === 'diasRestantes' ? parseInt(inputs[field], 10) : numericValue
-    );
-    setInputs(prev => ({ ...prev, [field]: formatCurrency(numericValue) }));
+    const numericValue = field === 'diasRestantes'
+      ? parseInt(inputs[field], 10) || 0
+      : parseFloat(inputs[field].replace(',', '.')) || 0;
+
+    updateData(field as keyof DashboardData, numericValue);
+
+    setInputs(prev => ({
+      ...prev,
+      [field]: field === 'diasRestantes' ? numericValue.toString() : formatCurrency(numericValue),
+    }));
     setIsEditing(prev => ({ ...prev, [field]: false }));
   };
 
   const handleFocus = (field: keyof typeof inputs, e: React.FocusEvent<HTMLInputElement>) => {
     setIsEditing(prev => ({ ...prev, [field]: true }));
-    const rawValue = (data[field === 'diasRestantes' ? 'diaCorte' : field as keyof DashboardData] as number)
-      .toString()
-      .replace('.', ',');
+    const rawValue = (data[field as keyof DashboardData] as number).toString().replace('.', ',');
     setInputs(prev => ({ ...prev, [field]: rawValue }));
     e.target.select();
   };
@@ -144,7 +146,7 @@ const AjustesDeMetas = () => {
                   <CalendarIcon className="h-4 w-4 text-blue-500" />
                   <Input
                     id="diasRestantes"
-                    value={isEditing.diasRestantes ? inputs.diasRestantes : data.diaCorte}
+                    value={isEditing.diasRestantes ? inputs.diasRestantes : data.diasRestantes}
                     onChange={(e) => handleInputChange('diasRestantes', e)}
                     onBlur={() => handleBlur('diasRestantes')}
                     onFocus={(e) => handleFocus('diasRestantes', e)}
